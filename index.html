@@ -629,7 +629,7 @@
   (function() {
     'use strict';
 
-    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.4) ====================
+    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.5) ====================
     const STORAGE_KEY = 'armplan_zheka_state_v1';
     const IDB_NAME = 'ArmPlanZhekaDB';
     const IDB_STORE = 'kv';
@@ -1458,8 +1458,7 @@
 
     // ==================== AUDIO, VIBRATION & AUTO-MUSIC ====================
     let sharedAudioCtx = null;
-    let lastBeepEndAt = 0;
-    let autoMusicTimer = null;
+    let beepSuspendTimer = null;
 
     function hasNativeMediaControl() {
       try {
@@ -1471,22 +1470,16 @@
 
     function triggerMusic(play, forceManual) {
       if (!forceManual && !state.settings.autoMusic) return false;
-      clearTimeout(autoMusicTimer);
       const bridge = window.AndroidBridge;
       if (!bridge || (play ? !bridge.mediaPlay : !bridge.mediaPause)) return false;
-      const run = () => {
-        try { play ? bridge.mediaPlay() : bridge.mediaPause(); } catch {}
-      };
-      // If rest-done beep just played, wait a tiny bit so AudioManager.isMusicActive() reflects external player cleanly
-      if (play && Date.now() < lastBeepEndAt) {
-        autoMusicTimer = setTimeout(run, Math.max(80, lastBeepEndAt - Date.now() + 60));
-      } else {
-        run();
-      }
+      try { play ? bridge.mediaPlay() : bridge.mediaPause(); } catch {}
       return true;
     }
 
     function unlockAudio() {
+      // Native APK WebView allows autoplay without user gesture; waking AudioContext on
+      // every tap would keep Android STREAM_MUSIC active and interfere with external players.
+      if (hasNativeMediaControl()) return;
       try {
         const Ctx = window.AudioContext || window.webkitAudioContext;
         if (!Ctx) return;
@@ -1509,8 +1502,8 @@
         if (!sharedAudioCtx) sharedAudioCtx = new Ctx();
         const ctx = sharedAudioCtx;
         if (ctx.state === 'suspended') ctx.resume();
+        clearTimeout(beepSuspendTimer);
         const now = ctx.currentTime;
-        lastBeepEndAt = Date.now() + 550;
         [[0, 740, 0.14], [0.22, 987.77, 0.24]].forEach(([delay, freq, dur]) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -1523,6 +1516,9 @@
           osc.start(now + delay);
           osc.stop(now + delay + dur + 0.02);
         });
+        beepSuspendTimer = setTimeout(() => {
+          try { if (sharedAudioCtx && sharedAudioCtx.state === 'running') sharedAudioCtx.suspend(); } catch {}
+        }, 650);
       } catch {}
     }
 
@@ -2098,7 +2094,7 @@
         subHtml = `<div class="top-sub light"><span class="top-dot"></span>${daysLeft !== null && daysLeft >= 0 ? `До старта: ${daysLeft} дн.` : 'Дневник силы'}</div>`;
         title = 'Прогресс';
       } else if (ui.tab === 'gym') {
-        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.4</div>`;
+        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.5</div>`;
         title = 'Настройки и зал';
       }
 
