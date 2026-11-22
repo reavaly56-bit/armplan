@@ -629,7 +629,7 @@
   (function() {
     'use strict';
 
-    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.2) ====================
+    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.3) ====================
     const STORAGE_KEY = 'armplan_zheka_state_v1';
     const IDB_NAME = 'ArmPlanZhekaDB';
     const IDB_STORE = 'kv';
@@ -1500,6 +1500,7 @@
       selectedDay: 1,
       editBaseOpen: false,
       calibSameHands: true,
+      editCascade: true,
       planWeek: 1,
       planDay: 1,
       progExId: 'd1_ez_curl',
@@ -1642,6 +1643,40 @@
             draft.sets[i].reps = draft.sets[i].reps - 1;
           }
         }
+      }
+    }
+
+    // Cascade manual weight edit ("Изменить") to remaining undone sets below so pyramid stays consistent
+    function cascadeRemainingWeights(draft, idx, oldW, newW, stepDir, equip) {
+      const delta = round2(newW - oldW);
+      if (Math.abs(delta) < 0.01) return;
+      let prevW = newW;
+      for (let i = idx + 1; i < draft.sets.length; i++) {
+        const s = draft.sets[i];
+        if (s.done) {
+          prevW = Number(s.weight) || prevW;
+          continue;
+        }
+        const curW = Number(s.weight) || 0;
+        let nextW;
+        if (stepDir === 1 || stepDir === -1) {
+          nextW = stepWeightBy(curW, stepDir, equip);
+        } else {
+          const rawTarget = Math.max(equip.min || 0, curW + delta);
+          nextW = snapWeight(rawTarget, equip).weight;
+        }
+        const baseCur = draft.baseSets && draft.baseSets[i] ? Number(draft.baseSets[i].weight) : curW;
+        const basePrev = draft.baseSets && draft.baseSets[i - 1] ? Number(draft.baseSets[i - 1].weight) : oldW;
+        const shouldBeHeavier = baseCur > basePrev + 0.01;
+        if (delta > 0 && nextW < prevW) {
+          nextW = shouldBeHeavier ? stepWeightBy(prevW, +1, equip) : snapWeight(prevW, equip).weight;
+          if (nextW < prevW) nextW = prevW;
+        } else if (delta > 0 && Math.abs(nextW - prevW) < 0.01 && shouldBeHeavier) {
+          const stepped = stepWeightBy(prevW, +1, equip);
+          if (stepped > prevW) nextW = stepped;
+        }
+        s.weight = Math.max(0, round2(nextW));
+        prevW = s.weight;
       }
     }
 
@@ -2030,7 +2065,7 @@
         subHtml = `<div class="top-sub light"><span class="top-dot"></span>${daysLeft !== null && daysLeft >= 0 ? `До старта: ${daysLeft} дн.` : 'Дневник силы'}</div>`;
         title = 'Прогресс';
       } else if (ui.tab === 'gym') {
-        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.2</div>`;
+        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.3</div>`;
         title = 'Настройки и зал';
       }
 
@@ -2538,6 +2573,12 @@
                   </div>
                 </div>
               </div>
+              ${dObj.sets.slice(idxToEdit + 1).some(s => !s.done) ? `
+                <label class="row small mt-8" style="cursor:pointer; font-weight:600; color:var(--text-2);">
+                  <input type="checkbox" ${ui.editCascade ? 'checked' : ''} data-action="toggle-edit-cascade" style="width:17px; height:17px; accent-color:var(--blue);" />
+                  <span>Подтянуть остальные подходы${handToEdit === 'R' ? ' (правая)' : (handToEdit === 'L' ? ' (левая)' : '')}</span>
+                </label>
+              ` : ''}
             `}
             ${sObj.done ? `
               <button class="btn btn-sm btn-danger btn-block mt-8" data-action="sess-uncheck-slot" data-idx="${idxToEdit}" data-hand="${handToEdit}">
@@ -3805,17 +3846,37 @@
         e.stopPropagation();
         const sess = state.activeSession;
         if (!sess) return;
+        const ex = state.exercises.find(x => x.id === sess.exId);
         const idx = parseInt(btn.dataset.idx, 10);
         const h = btn.dataset.hand || sess.hand;
         const same = sess.editingSlot && sess.editingSlot.setIdx === idx && sess.editingSlot.hand === h;
         sess.editingSlot = same ? null : { setIdx: idx, hand: h };
+        if (!same) {
+          const dTarget = getOrInitDraft(ex, h, computePlan(ex, h, sess.week), sess.week);
+          ui.editCascade = !(dTarget.sets[idx] && dTarget.sets[idx].done);
+        }
         saveState();
         render();
       }
       else if (act === 'sess-close-edit') {
         e.stopPropagation();
         if (state.activeSession) {
-          state.activeSession.editingSlot = null;
+          const sess = state.activeSession;
+          // Flush any pending numeric input before closing (in case mobile WebView skipped blur->change)
+          const wInp = document.querySelector('[data-action="sess-inp-w"]');
+          if (wInp && sess.editingSlot) {
+            const ex = state.exercises.find(x => x.id === sess.exId);
+            const idx = parseInt(wInp.dataset.idx, 10);
+            const h = wInp.dataset.hand || sess.hand;
+            const draft = getOrInitDraft(ex, h, computePlan(ex, h, sess.week), sess.week);
+            const parsed = Math.max(0, round2(parseFloat(wInp.value) || 0));
+            if (draft.sets[idx] && Math.abs(parsed - (Number(draft.sets[idx].weight) || 0)) >= 0.01) {
+              const oldW = Number(draft.sets[idx].weight) || 0;
+              draft.sets[idx].weight = parsed;
+              if (ui.editCascade) cascadeRemainingWeights(draft, idx, oldW, parsed, null, getEquip(ex.equipId));
+            }
+          }
+          sess.editingSlot = null;
           saveState();
           render();
         }
@@ -3833,12 +3894,14 @@
         if (slotDone || (idx === sess.setIdx && h === sess.hand)) {
           // Tap on already-done (or current) slot immediately toggles its inline editor (with "Снять галочку")
           sess.editingSlot = same ? null : { setIdx: idx, hand: h };
+          if (!same) ui.editCascade = !slotDone;
         } else if (sess.phase === 'ready' || sess.phase === 'rest_done') {
           sess.setIdx = idx;
           sess.hand = h;
           sess.editingSlot = null;
         } else {
           sess.editingSlot = same ? null : { setIdx: idx, hand: h };
+          if (!same) ui.editCascade = !slotDone;
         }
         saveState();
         render();
@@ -3937,7 +4000,11 @@
         const draft = getOrInitDraft(ex, h, plan, sess.week);
         if (!draft.sets[idx]) return;
         if (act === 'sess-step-w') {
-          draft.sets[idx].weight = stepWeightBy(draft.sets[idx].weight, dir, getEquip(ex.equipId));
+          const equip = getEquip(ex.equipId);
+          const oldW = Number(draft.sets[idx].weight) || 0;
+          const newW = stepWeightBy(oldW, dir, equip);
+          draft.sets[idx].weight = newW;
+          if (ui.editCascade) cascadeRemainingWeights(draft, idx, oldW, newW, dir, equip);
         } else if (ex.type === 'static') {
           draft.sets[idx].sec = Math.max(5, (draft.sets[idx].sec || 15) + dir * 5);
         } else {
@@ -4156,6 +4223,10 @@
       if (!el) return;
       const act = el.dataset.action;
 
+      if (act === 'toggle-edit-cascade') {
+        ui.editCascade = Boolean(el.checked);
+        return;
+      }
       if (act === 'sess-inp-w' || act === 'sess-inp-r') {
         const sess = state.activeSession;
         if (!sess) return;
@@ -4164,7 +4235,18 @@
         const h = el.dataset.hand || sess.hand;
         const draft = getOrInitDraft(ex, h, computePlan(ex, h, sess.week), sess.week);
         if (!draft.sets[idx]) return;
-        if (act === 'sess-inp-w') draft.sets[idx].weight = Math.max(0, round2(parseFloat(el.value) || 0));
+        if (act === 'sess-inp-w') {
+          const oldW = Number(draft.sets[idx].weight) || 0;
+          const newW = Math.max(0, round2(parseFloat(el.value) || 0));
+          draft.sets[idx].weight = newW;
+          if (ui.editCascade) cascadeRemainingWeights(draft, idx, oldW, newW, null, getEquip(ex.equipId));
+          saveState();
+          // Re-render shortly so remaining sets update live without swallowing a direct tap on "Готово"
+          setTimeout(() => {
+            if (state.activeSession && state.activeSession.editingSlot) render();
+          }, 60);
+          return;
+        }
         else if (ex.type === 'static') draft.sets[idx].sec = Math.max(1, parseInt(el.value, 10) || 15);
         else draft.sets[idx].reps = Math.max(0, parseInt(el.value, 10) || 0);
         saveState();
