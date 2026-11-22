@@ -402,21 +402,29 @@
     }
     .feel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
     .feel-btn {
-      padding: 8px 3px; border-radius: 10px; font-size: 11.5px; font-weight: 700;
+      padding: 7px 3px 6px; border-radius: 10px; font-size: 11px; font-weight: 800;
       background: var(--surface); border: 1.5px solid var(--border); color: var(--muted);
       line-height: 1.15; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     }
+    .feel-sub { font-size: 9px; font-weight: 600; opacity: 0.78; white-space: nowrap; }
     .feel-btn.active[data-feel="easy"] { background: var(--ok-bg); border-color: var(--ok); color: var(--ok-text); }
     .feel-btn.active[data-feel="ok"] { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
     .feel-btn.active[data-feel="hard"] { background: var(--heavy-bg); border-color: var(--heavy); color: var(--heavy); }
     .feel-btn.active[data-feel="fail"] { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
     .feel-feedback {
-      margin-top: 7px; font-size: 12px; font-weight: 700; line-height: 1.3;
-      padding: 6px 9px; border-radius: 9px;
+      margin-top: 7px; font-size: 12px; font-weight: 700; line-height: 1.32;
+      padding: 7px 9px; border-radius: 9px;
     }
     .feel-feedback.easy { background: var(--ok-bg); color: var(--ok-text); }
     .feel-feedback.hard { background: var(--heavy-bg); color: var(--heavy); }
     .feel-feedback.fail { background: var(--danger-bg); color: var(--danger); }
+    .retry-banner {
+      background: var(--danger-bg); border: 1px solid rgba(220,38,38,0.22);
+      color: var(--danger); border-radius: 12px; padding: 9px 11px; margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      text-align: left; font-size: 12px; font-weight: 700; line-height: 1.3;
+    }
 
     /* Inline editor */
     .edit-panel {
@@ -469,6 +477,19 @@
     }
     .nb-row.active .nb-check { border-color: var(--blue); background: var(--blue-bg); }
     .nb-row.done .nb-check { border-color: var(--ok); background: var(--ok); color: #FFFFFF; }
+    .nb-row.extra-row { padding: 7px 2px; cursor: default; opacity: 0.85; }
+    .nb-row.extra-row .nb-weight { font-size: 14px; font-weight: 600; color: var(--muted); }
+    .nb-row.extra-fail .nb-weight { text-decoration: line-through; color: var(--muted-2); }
+    .nb-idx.warm { color: var(--ok-text); font-weight: 800; }
+    .nb-idx.fail { color: var(--danger); font-weight: 800; }
+    .nb-pill-warm {
+      font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+      background: var(--ok-bg); color: var(--ok-text); white-space: nowrap;
+    }
+    .nb-pill-fail {
+      font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
+      background: var(--danger-bg); color: var(--danger); white-space: nowrap;
+    }
 
     /* Paired R / L pills on unilateral sets */
     .rl-checks { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -602,7 +623,7 @@
   (function() {
     'use strict';
 
-    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.0) ====================
+    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.1) ====================
     const STORAGE_KEY = 'armplan_zheka_state_v1';
     const IDB_NAME = 'ArmPlanZhekaDB';
     const IDB_STORE = 'kv';
@@ -1021,7 +1042,9 @@
 
     function getBestPeakFromRecord(rec) {
       let bestW = 0, bestR = 0, bestSec = 0;
-      for (const s of (rec.sets || [])) {
+      const validSets = (rec.sets || []).filter(s => !s.warmup && !s.uncounted && !s.failed);
+      const list = validSets.length ? validSets : (rec.sets || []);
+      for (const s of list) {
         const w = Number(s.weight) || 0;
         const r = Number(s.reps) || 0;
         const sec = Number(s.sec) || 0;
@@ -1036,7 +1059,7 @@
       for (const k of Object.keys(state.drafts)) {
         if (!exId || k.includes(`_${exId}_`)) {
           const d = state.drafts[k];
-          if (!d || !d.sets || !d.sets.some(s => s.done)) delete state.drafts[k];
+          if (!d || !d.sets || (!d.sets.some(s => s.done) && !(d.extraLog && d.extraLog.length))) delete state.drafts[k];
         }
       }
     }
@@ -1392,13 +1415,24 @@
       if (!best.weight) return '';
       const actualR = best.reps || basePeakReps;
       const actualRB = Math.max(0, Math.min(2, actualR - basePeakReps));
+      const plannedW = Number(plannedPeakW) || 0;
+      const plannedR = Number(plannedPeakReps) || basePeakReps;
+      const missedPlan = plannedW > 0 && (
+        best.weight < plannedW - 0.01 ||
+        (Math.abs(best.weight - plannedW) <= 0.01 && actualR < plannedR)
+      );
 
       if (effort === 'fail') {
-        const nextW = (plannedPeakW > 0 && best.weight < plannedPeakW - 0.01) ? best.weight : stepWeightBy(best.weight, -1, equip);
+        const nextW = (plannedW > 0 && best.weight < plannedW - 0.01) ? best.weight : stepWeightBy(best.weight, -1, equip);
         return `Нед ${nextWk} (тяжёлая): откат на ${fmtKg(nextW)}×${basePeakReps}`;
       }
       if (effort === 'hard') {
         return `Нед ${nextWk} (тяжёлая): закрепим ${fmtKg(best.weight)}×${basePeakReps + Math.min(1, actualRB)}`;
+      }
+      if (missedPlan) {
+        const nextW = best.weight < plannedW - 0.01 ? Math.min(plannedW, stepWeightBy(best.weight, +1, equip)) : plannedW;
+        const nextR = basePeakReps + Math.max(0, plannedR - basePeakReps);
+        return `Нед ${nextWk} (тяжёлая): вернёмся к цели ${fmtKg(nextW)}×${nextR}`;
       }
       const stepped = stepPeakForward(best.weight, actualRB, equip, effort === 'easy');
       const nextR = basePeakReps + stepped.repBonus;
@@ -1494,6 +1528,7 @@
           sess.restEndAt = 0;
           sess.restType = null;
           sess.phase = 'rest_done';
+          if (sess.lastCompleted && sess.lastCompleted.fromFailBtn) sess.lastCompleted = null;
           saveState();
           notifyRestDone();
           showToast('Время вышло — приступай к подходу!');
@@ -1549,12 +1584,14 @@
         if (!d.baseSets || d.baseSets.length !== d.sets.length) {
           d.baseSets = JSON.parse(JSON.stringify(d.sets));
         }
+        if (!Array.isArray(d.extraLog)) d.extraLog = [];
         return d;
       }
       const sets = makeSets();
       state.drafts[k] = {
         sets,
         baseSets: JSON.parse(JSON.stringify(sets)),
+        extraLog: [],
         effort: 'ok',
         effortManual: false,
         liveNote: '',
@@ -1564,77 +1601,183 @@
       return state.drafts[k];
     }
 
-    // LIVE PER-SET AUTOREGULATION:
-    // Idempotently adjusts remaining undone sets (idx > fromSetIdx) from baseSets so changing mind never stacks!
-    function applyLiveFeel(ex, hand, week, fromSetIdx, feel) {
-      if (ex.type === 'warmup') return '';
-      const plan = computePlan(ex, hand, week);
-      const draft = getOrInitDraft(ex, hand, plan, week);
-      const equip = getEquip(ex.equipId);
-      if (!draft.sets[fromSetIdx]) return '';
+    function cloneObj(x) {
+      return JSON.parse(JSON.stringify(x));
+    }
 
-      draft.sets[fromSetIdx].feel = feel;
-      draft.liveFeel = feel;
-      const doneSet = draft.sets[fromSetIdx];
-      let lastChangedW = null, lastChangedR = null;
+    // Bump weight by at least 1 step; when strong=true ("Очень легко") and 1 step is tiny (<6%), step +2 (up to ~13%)
+    function bumpWeightForFeel(w, dir, equip, strong) {
+      const one = stepWeightBy(w, dir, equip);
+      if (!strong || w <= 0) return one;
+      const pct = Math.abs(one - w) / w;
+      if (pct > 0 && pct < 0.06) {
+        const two = stepWeightBy(one, dir, equip);
+        if (Math.abs(two - w) / w <= 0.13) return two;
+      }
+      return one;
+    }
 
-      for (let i = fromSetIdx + 1; i < draft.sets.length; i++) {
+    function adjustRemainingWorkingSets(draft, fromIdx, dir, ex, equip, strong) {
+      for (let i = fromIdx; i < draft.sets.length; i++) {
         if (draft.sets[i].done) continue;
-        const orig = draft.baseSets[i] || draft.sets[i];
-        let newW = orig.weight;
-        let newR = orig.reps;
-
-        if (feel === 'ok') {
-          newW = orig.weight;
-          newR = orig.reps;
-        } else if (feel === 'easy') {
-          const raised = stepWeightBy(orig.weight, +1, equip);
-          if (raised > orig.weight + 0.01) newW = raised;
-          else if (ex.type !== 'static') newR = orig.reps + 1;
-        } else if (feel === 'hard') {
-          // Hold back remaining sets by -1 step (never climbing aggressively after a grinder)
-          const eased = stepWeightBy(orig.weight, -1, equip);
-          newW = eased;
-        } else if (feel === 'fail') {
-          // Drop remaining sets cleanly below what just failed or -1 step from orig
-          const baseRef = Math.min(orig.weight, doneSet.weight);
-          newW = stepWeightBy(baseRef, -1, equip);
+        const curW = Number(draft.sets[i].weight) || 0;
+        if (dir > 0) {
+          const raised = bumpWeightForFeel(curW, +1, equip, strong);
+          if (raised > curW + 0.01) {
+            draft.sets[i].weight = raised;
+          } else if (ex.type !== 'static') {
+            draft.sets[i].reps = (draft.sets[i].reps || 1) + 1;
+          }
+        } else if (dir < 0) {
+          const lowered = bumpWeightForFeel(curW, -1, equip, false);
+          if (lowered < curW - 0.01) {
+            draft.sets[i].weight = lowered;
+          } else if (ex.type !== 'static' && (draft.sets[i].reps || 1) > 2) {
+            draft.sets[i].reps = draft.sets[i].reps - 1;
+          }
         }
+      }
+    }
 
-        draft.sets[i].weight = newW;
-        draft.sets[i].reps = newR;
-        lastChangedW = newW;
-        lastChangedR = newR;
+    function deriveDraftEffort(draft) {
+      if (draft.effortManual) return;
+      const doneSets = draft.sets.filter(s => s.done);
+      const peakDone = doneSets.filter(s => s.isPeak);
+      const pool = peakDone.length ? peakDone : doneSets;
+      const hasFailAttempt = (draft.extraLog || []).some(x => x.kind === 'fail');
+      if (pool.some(s => s.feel === 'fail')) draft.effort = 'fail';
+      else if (pool.some(s => s.feel === 'hard')) draft.effort = 'hard';
+      else if (hasFailAttempt) draft.effort = 'hard';
+      else if (pool.length && pool[pool.length - 1].feel === 'easy') draft.effort = 'easy';
+      else draft.effort = 'ok';
+    }
+
+    // LIVE PER-SET AUTOREGULATION (v2.1.1):
+    // - Restores clean pre-feel snapshot of THIS completion event -> 100% idempotent when toggling buttons,
+    //   AND genuinely stacks across consecutive sets!
+    // - 'easy' ("Очень легко"): moves attempt to warm-up (does NOT burn a working set!), raises this + remaining sets.
+    // - 'ok' ("Норм"): counts normally, continues plan.
+    // - 'hard' ("Еле-еле"): counts normally, eases remaining sets -1 step.
+    // - 'fail' ("Не пошло"): marks attempt as uncounted (NOT in records!), lowers this + remaining sets -1 step to redo.
+    function applyLiveFeelOnSession(sess, ex, feel) {
+      if (!sess || !sess.lastCompleted || !sess.lastCompleted.snap || ex.type === 'warmup') return;
+      const lc = sess.lastCompleted;
+      const snap = lc.snap;
+      const isUni = ex.hands === 'uni';
+      const equip = getEquip(ex.equipId);
+
+      const draftR = isUni
+        ? getOrInitDraft(ex, 'R', computePlan(ex, 'R', sess.week), sess.week)
+        : getOrInitDraft(ex, 'both', computePlan(ex, 'both', sess.week), sess.week);
+      const draftL = isUni
+        ? getOrInitDraft(ex, 'L', computePlan(ex, 'L', sess.week), sess.week)
+        : null;
+
+      // 1. Restore exact pre-feel baseline for this completion
+      draftR.sets = cloneObj(snap.setsR);
+      draftR.extraLog = cloneObj(snap.extraR || []);
+      draftR.effort = snap.effortR;
+      if (isUni && draftL) {
+        draftL.sets = cloneObj(snap.setsL);
+        draftL.extraLog = cloneObj(snap.extraL || []);
+        draftL.effort = snap.effortL;
+      }
+      sess.setIdx = snap.nextSetIdx;
+      sess.hand = snap.nextHand;
+      sess.phase = snap.nextPhase;
+      sess.restType = snap.nextRestType;
+
+      const targetHands = (lc.pairedBoth && isUni) ? ['R', 'L'] : [lc.hand];
+      const getD = h => (isUni ? (h === 'R' ? draftR : draftL) : draftR);
+
+      if (feel === 'ok') {
+        lc.feel = 'ok';
+        lc.feedback = '';
+        draftR.liveNote = '';
+        if (draftL) draftL.liveNote = '';
+        return;
       }
 
-      // Derive exercise effort automatically from worst/peak set feel unless user manually overrides on finish screen
-      if (!draft.effortManual) {
-        const doneSets = draft.sets.filter(s => s.done);
-        const peakDone = doneSets.filter(s => s.isPeak);
-        const pool = peakDone.length ? peakDone : doneSets;
-        if (pool.some(s => s.feel === 'fail')) draft.effort = 'fail';
-        else if (pool.some(s => s.feel === 'hard')) draft.effort = 'hard';
-        else if (pool.length && pool[pool.length - 1].feel === 'easy') draft.effort = 'easy';
-        else draft.effort = 'ok';
-      }
-
-      const peakAfter = draft.sets[draft.sets.length - 1];
-      let msg = '';
-      if (feel === 'easy' && lastChangedW !== null) {
-        msg = `Пошло легко — поднял оставшиеся (пик ${fmtKg(peakAfter.weight)}×${ex.type === 'static' ? (peakAfter.sec || 15) + 'с' : peakAfter.reps})`;
-      } else if (feel === 'hard' && lastChangedW !== null) {
-        msg = `Зашло еле-еле — притормозил оставшиеся (пик ${fmtKg(peakAfter.weight)}×${ex.type === 'static' ? (peakAfter.sec || 15) + 'с' : peakAfter.reps})`;
-      } else if (feel === 'fail' && lastChangedW !== null) {
-        msg = `Не пошло — скинул оставшиеся (пик ${fmtKg(peakAfter.weight)}×${ex.type === 'static' ? (peakAfter.sec || 15) + 'с' : peakAfter.reps})`;
-      } else if (feel === 'easy') {
-        msg = 'Отлично зашло — учту при расчёте следующей недели!';
+      if (feel === 'easy') {
+        for (const h of targetHands) {
+          const d = getD(h);
+          const s = d.sets[lc.setIdx];
+          if (!s) continue;
+          d.extraLog.push({ kind: 'warmup', setIdx: lc.setIdx, weight: s.weight, reps: s.reps, sec: s.sec || null });
+          s.done = false;
+          s.feel = 'ok';
+          adjustRemainingWorkingSets(d, lc.setIdx, +1, ex, equip, true);
+          deriveDraftEffort(d);
+        }
+        // Keep working set counter intact — next up is THIS same working set at higher weight!
+        if (lc.pairedBoth && isUni) {
+          sess.setIdx = lc.setIdx;
+          sess.hand = 'R';
+        } else if (!isUni) {
+          sess.setIdx = lc.setIdx;
+          sess.hand = 'both';
+        } else if (lc.hand === 'L') {
+          sess.setIdx = lc.setIdx;
+          sess.hand = (draftR.sets[lc.setIdx] && !draftR.sets[lc.setIdx].done) ? 'R' : 'L';
+        } else {
+          // Right hand rated separately before Left: Left goes next, then Right retries this set heavier
+          sess.setIdx = lc.setIdx;
+          sess.hand = 'L';
+        }
+        const d0 = getD(targetHands[0]);
+        const nextS = d0.sets[lc.setIdx];
+        const peakS = d0.sets[d0.sets.length - 1];
+        lc.feel = 'easy';
+        lc.feedback = `Записал в разминку (подход не сгорел) — поднял веса: подход ${lc.setIdx + 1} → ${fmtSetShort(ex, nextS)}, пик ${fmtSetShort(ex, peakS)}`;
       } else if (feel === 'hard') {
-        msg = 'Запомнил «еле-еле» — на следующей тяжёлой закрепим вес.';
+        for (const h of targetHands) {
+          const d = getD(h);
+          if (!d.sets[lc.setIdx]) continue;
+          d.sets[lc.setIdx].feel = 'hard';
+          adjustRemainingWorkingSets(d, lc.setIdx + 1, -1, ex, equip, false);
+          deriveDraftEffort(d);
+        }
+        const d0 = getD(targetHands[0]);
+        const peakS = d0.sets[d0.sets.length - 1];
+        lc.feel = 'hard';
+        lc.feedback = lc.setIdx < d0.sets.length - 1
+          ? `Подход засчитан — притормозил оставшиеся (пик ${fmtSetShort(ex, peakS)})`
+          : 'Запомнил «еле-еле» — на следующей тяжёлой закрепим вес.';
       } else if (feel === 'fail') {
-        msg = 'Запомнил «не пошло» — мягко скорректирую следующую неделю.';
+        for (const h of targetHands) {
+          const d = getD(h);
+          const s = d.sets[lc.setIdx];
+          if (!s) continue;
+          d.extraLog.push({ kind: 'fail', setIdx: lc.setIdx, weight: s.weight, reps: s.reps, sec: s.sec || null });
+          s.done = false;
+          s.feel = 'ok';
+          adjustRemainingWorkingSets(d, lc.setIdx, -1, ex, equip, false);
+          deriveDraftEffort(d);
+        }
+        if (lc.pairedBoth && isUni) {
+          sess.setIdx = lc.setIdx;
+          sess.hand = 'R';
+        } else if (!isUni) {
+          sess.setIdx = lc.setIdx;
+          sess.hand = 'both';
+        } else if (lc.hand === 'L') {
+          sess.setIdx = lc.setIdx;
+          sess.hand = (draftR.sets[lc.setIdx] && !draftR.sets[lc.setIdx].done) ? 'R' : 'L';
+        } else {
+          sess.setIdx = lc.setIdx;
+          sess.hand = 'L';
+        }
+        const d0 = getD(targetHands[0]);
+        const retryS = d0.sets[lc.setIdx];
+        const peakS = d0.sets[d0.sets.length - 1];
+        lc.feel = 'fail';
+        lc.feedback = `Не засчитал — скинул вес, переделаем подход ${lc.setIdx + 1} (${fmtSetShort(ex, retryS)}, пик ${fmtSetShort(ex, peakS)})`;
       }
-      draft.liveNote = msg;
-      return msg;
+      for (const h of targetHands) {
+        const d = getD(h);
+        d.liveNote = lc.feedback;
+        d.liveFeel = lc.feel;
+      }
     }
 
     function isHandDoneOnWeek(exId, hand, week) {
@@ -1781,6 +1924,13 @@
         feel: s.feel || 'ok',
         done: true
       }));
+      const warmupSnapshot = (draft.extraLog || [])
+        .filter(x => x.kind === 'warmup')
+        .map(x => ({
+          weight: round2(Number(x.weight) || 0),
+          reps: Math.max(0, parseInt(x.reps, 10) || 0),
+          sec: x.sec ? parseInt(x.sec, 10) : null
+        }));
 
       const plannedPeakSet = (plan.sets && plan.sets.length) ? plan.sets[plan.sets.length - 1] : null;
       const best = getBestPeakFromRecord({ sets: setsSnapshot });
@@ -1800,6 +1950,7 @@
         hand,
         type: ex.type,
         sets: setsSnapshot,
+        warmupSets: warmupSnapshot.length ? warmupSnapshot : undefined,
         plannedPeakW: plannedPeakSet ? Number(plannedPeakSet.weight) || 0 : 0,
         plannedPeakReps: plannedPeakSet ? Number(plannedPeakSet.reps) || 0 : 0,
         bestWeight: best.weight,
@@ -1843,7 +1994,7 @@
         subHtml = `<div class="top-sub light"><span class="top-dot"></span>${daysLeft !== null && daysLeft >= 0 ? `До старта: ${daysLeft} дн.` : 'Дневник силы'}</div>`;
         title = 'Прогресс';
       } else if (ui.tab === 'gym') {
-        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1</div>`;
+        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.1</div>`;
         title = 'Настройки и зал';
       }
 
@@ -2188,7 +2339,11 @@
         const renderSummary = (d, label) => {
           const used = d.sets.filter(s => s.done);
           const arr = used.length ? used : d.sets;
-          return `<div class="plan-sets" style="margin-top:4px;">${label ? `<span class="muted">${label}: </span>` : ''}${arr.map(s => fmtSetShort(ex, s)).join(' · ')}</div>`;
+          const warm = (d.extraLog || []).filter(x => x.kind === 'warmup');
+          return `
+            <div class="plan-sets" style="margin-top:4px;">${label ? `<span class="muted">${label}: </span>` : ''}${arr.map(s => fmtSetShort(ex, s)).join(' · ')}</div>
+            ${warm.length ? `<div class="small muted" style="font-size:11.5px; margin-top:2px;">${label ? `${label} разм.: ` : 'Разминка: '}${warm.map(s => fmtSetShort(ex, s)).join(' · ')}</div>` : ''}
+          `;
         };
 
         let nextOutcomeHtml = '';
@@ -2347,12 +2502,25 @@
       const renderLiveFeelWidget = () => {
         if (isWarmup || !sess.lastCompleted || sess.restType === 'between_ex') return '';
         const lc = sess.lastCompleted;
-        const targetDraft = lc.hand === 'R' ? draftR : (lc.hand === 'L' ? draftL : draft);
-        const doneSet = targetDraft.sets[lc.setIdx];
-        if (!doneSet) return '';
-        const curFeel = doneSet.feel || 'ok';
-        const scopeText = lc.pairedBoth ? `подход ${lc.setIdx + 1} (П·Л)` : (lc.hand === 'R' ? `подход ${lc.setIdx + 1} · Правая` : (lc.hand === 'L' ? `подход ${lc.setIdx + 1} · Левая` : `подход ${lc.setIdx + 1}`));
-        const feedback = targetDraft.liveNote;
+        if (lc.fromFailBtn) {
+          return `
+            <div class="retry-banner">
+              <span>${esc(lc.feedback || 'Не засчитал — скинул вес, переделаем подход')}</span>
+              <button class="btn btn-xs" style="background:var(--surface); border-color:var(--border); flex-shrink:0;" data-action="sess-undo-fail">Отменить</button>
+            </div>
+          `;
+        }
+        const curFeel = lc.feel || 'ok';
+        const scopeText = lc.pairedBoth
+          ? `подход ${lc.setIdx + 1} (П·Л)`
+          : (lc.hand === 'R' ? `подход ${lc.setIdx + 1} · Правая` : (lc.hand === 'L' ? `подход ${lc.setIdx + 1} · Левая` : `подход ${lc.setIdx + 1}`));
+        const feedback = lc.feedback || '';
+        const btns = [
+          { f: 'easy', lbl: 'Очень легко', sub: 'разминка ↑' },
+          { f: 'ok',   lbl: 'Норм',        sub: 'по плану' },
+          { f: 'hard', lbl: 'Еле-еле',     sub: 'полегче ↓' },
+          { f: 'fail', lbl: 'Не пошло',    sub: 'повтор ↓' }
+        ];
         return `
           <div class="feel-box">
             <div class="feel-head">
@@ -2360,8 +2528,11 @@
               <span class="muted" style="font-weight:600; white-space:nowrap;">авто-план</span>
             </div>
             <div class="feel-grid">
-              ${['easy', 'ok', 'hard', 'fail'].map(f => `
-                <button class="feel-btn ${curFeel === f ? 'active' : ''}" data-feel="${f}" data-action="sess-live-feel">${feelLabel(f)}</button>
+              ${btns.map(b => `
+                <button class="feel-btn ${curFeel === b.f ? 'active' : ''}" data-feel="${b.f}" data-action="sess-live-feel">
+                  <span>${b.lbl}</span>
+                  <span class="feel-sub">${b.sub}</span>
+                </button>
               `).join('')}
             </div>
             ${feedback && curFeel !== 'ok' ? `<div class="feel-feedback ${curFeel}">${esc(feedback)}</div>` : ''}
@@ -2379,25 +2550,35 @@
 
         const isBetweenHands = sess.restType === 'between_hands';
         const isBetweenEx = sess.restType === 'between_ex';
+        const isRetryFail = sess.restType === 'retry_fail' || (sess.lastCompleted && sess.lastCompleted.feel === 'fail');
+        const isAfterWarmup = Boolean(sess.lastCompleted && sess.lastCompleted.feel === 'easy');
 
         const restHeaderLeft = isBetweenHands
           ? `${ICONS.timer} Пауза между руками`
-          : `${ICONS.timer} Отдых`;
+          : (isRetryFail ? `${ICONS.timer} Отдых перед повтором` : `${ICONS.timer} Отдых`);
         const restChip = isBetweenEx
           ? '<span class="chip chip-muted">Пауза между упр.</span>'
           : (isBetweenHands
             ? `<span class="chip chip-heavy">Пик · подход ${sess.setIdx + 1} из ${draft.sets.length}</span>`
-            : `<span class="chip chip-muted">Перед подходом ${sess.setIdx + 1}</span>`);
+            : (isRetryFail
+              ? `<span class="chip chip-heavy">Повтор · подход ${sess.setIdx + 1}</span>`
+              : `<span class="chip chip-muted">Перед подходом ${sess.setIdx + 1}</span>`));
 
         let nextTitle = isBetweenEx
           ? `Дальше · ${ex.name}`
           : (isBetweenHands
             ? `Дальше · <strong>Левая рука</strong>`
-            : `Подход ${sess.setIdx + 1} из ${draft.sets.length}${isUni ? (hand === 'R' ? ' · Правая' : ' · Левая') : ''}`);
+            : `${isRetryFail ? 'Повтор · ' : ''}Подход ${sess.setIdx + 1} из ${draft.sets.length}${isUni ? (hand === 'R' ? ' · Правая' : ' · Левая') : ''}`);
 
         const rightDoneChip = (isBetweenHands && sess.lastCompleted)
-          ? `<span class="chip chip-ok" style="padding:2px 7px; font-size:10.5px;">П ✓ ${fmtSetShort(ex, sess.lastCompleted)}</span>`
-          : '';
+          ? (sess.lastCompleted.feel === 'easy'
+              ? `<span class="chip chip-light" style="padding:2px 7px; font-size:10.5px;">П разм. ${fmtSetShort(ex, sess.lastCompleted)}</span>`
+              : (sess.lastCompleted.feel === 'fail'
+                ? `<span class="chip chip-heavy" style="padding:2px 7px; font-size:10.5px;">П не засч.</span>`
+                : `<span class="chip chip-ok" style="padding:2px 7px; font-size:10.5px;">П ✓ ${fmtSetShort(ex, sess.lastCompleted)}</span>`))
+          : (isAfterWarmup
+            ? `<span class="chip chip-ok" style="padding:2px 7px; font-size:10.5px;">↑ после разминки</span>`
+            : (isRetryFail && !isBetweenEx ? `<span class="chip chip-heavy" style="padding:2px 7px; font-size:10.5px;">↓ снизил вес</span>` : ''));
 
         const nextDesc = curSet
           ? (isWarmup ? `${curSet.reps} повторений` : (isStatic ? `${fmtKg(curSet.weight)} кг · ${curSet.sec || 15} сек` : `${fmtKg(curSet.weight)} кг × ${curSet.reps}`))
@@ -2526,7 +2707,13 @@
             ${isUni ? `
               <div style="display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:4px;">
                 <span class="hand-pill-lg ${hand === 'L' ? 'left' : ''}" style="margin-bottom:0;">${hand === 'R' ? 'Правая рука' : 'Левая рука'}</span>
-                ${justFinishedRightNoRest ? `<span class="chip chip-ok">П ✓ ${fmtSetShort(ex, sess.lastCompleted)}</span>` : ''}
+                ${justFinishedRightNoRest ? (
+                  sess.lastCompleted.feel === 'easy'
+                    ? `<span class="chip chip-light">П разм. ${fmtSetShort(ex, sess.lastCompleted)}</span>`
+                    : (sess.lastCompleted.feel === 'fail'
+                      ? `<span class="chip chip-heavy">П не засч.</span>`
+                      : `<span class="chip chip-ok">П ✓ ${fmtSetShort(ex, sess.lastCompleted)}</span>`)
+                ) : ''}
               </div>
             ` : ''}
 
@@ -2553,8 +2740,56 @@
         `;
       }
 
-      // Notebook Set List (paired R/L pills for uni, clean checks for both/warmup)
+      // Notebook Set List: group extra rows (warm-up / uncounted fails) right above their corresponding working set!
+      const extraByIdx = {};
+      if (!isWarmup) {
+        const listR = draftR.extraLog || [];
+        const listL = isUni ? (draftL.extraLog || []) : [];
+        const items = [];
+        if (isUni) {
+          const usedL = new Set();
+          listR.forEach(itemR => {
+            const matchIdx = listL.findIndex((x, i) => !usedL.has(i) && x.kind === itemR.kind && x.setIdx === itemR.setIdx && x.weight === itemR.weight && x.reps === itemR.reps);
+            if (matchIdx >= 0) {
+              usedL.add(matchIdx);
+              items.push({ ...itemR, handTag: 'П·Л' });
+            } else {
+              items.push({ ...itemR, handTag: 'П' });
+            }
+          });
+          listL.forEach((itemL, i) => {
+            if (!usedL.has(i)) items.push({ ...itemL, handTag: 'Л' });
+          });
+        } else {
+          listR.forEach(item => items.push({ ...item, handTag: '' }));
+        }
+        items.forEach(it => {
+          const slot = Math.max(0, Math.min(draftR.sets.length - 1, Number(it.setIdx) || 0));
+          if (!extraByIdx[slot]) extraByIdx[slot] = [];
+          extraByIdx[slot].push(it);
+        });
+      }
+      const renderExtraFor = (slotIdx) => {
+        const arr = extraByIdx[slotIdx];
+        if (!arr || !arr.length) return '';
+        return arr.map(it => {
+          const isW = it.kind === 'warmup';
+          const wStr = `${fmtKg(it.weight)} кг <span class="nb-x">×</span> ${isStatic ? (it.sec || 15) + 'с' : it.reps}`;
+          return `
+            <div class="nb-row extra-row ${isW ? '' : 'extra-fail'}">
+              <div class="nb-left">
+                <span class="nb-idx ${isW ? 'warm' : 'fail'}">${isW ? 'Р' : '✕'}</span>
+                <span class="nb-weight">${wStr}</span>
+                ${it.handTag ? `<span class="nb-tag">${it.handTag}</span>` : ''}
+              </div>
+              <span class="${isW ? 'nb-pill-warm' : 'nb-pill-fail'}">${isW ? 'разминка' : 'не засчитан'}</span>
+            </div>
+          `;
+        }).join('');
+      };
+
       const nbRows = draftR.sets.map((sR, idx) => {
+        const beforeExtra = renderExtraFor(idx);
         if (isUni) {
           const sL = draftL.sets[idx] || sR;
           const bothDone = sR.done && sL.done;
@@ -2567,6 +2802,7 @@
           const editR = sess.editingSlot && sess.editingSlot.setIdx === idx && sess.editingSlot.hand === 'R' && !(idx === sess.setIdx && hand === 'R');
           const editL = sess.editingSlot && sess.editingSlot.setIdx === idx && sess.editingSlot.hand === 'L' && !(idx === sess.setIdx && hand === 'L');
           return `
+            ${beforeExtra}
             <div class="nb-row ${bothDone ? 'done' : ''} ${isCurRow ? 'active' : ''}">
               <div class="nb-left" data-action="sess-pick-slot" data-idx="${idx}" data-hand="${!sR.done ? 'R' : 'L'}">
                 <span class="nb-idx">${idx + 1}</span>
@@ -2594,6 +2830,7 @@
           : (sR.isPeak ? 'пик' : (isCur ? `отдых ${fmtTime(tSet.restSec || 90)}` : ''));
         const editRow = sess.editingSlot && sess.editingSlot.setIdx === idx && idx !== sess.setIdx;
         return `
+          ${beforeExtra}
           <div class="nb-row ${sR.done ? 'done' : ''} ${isCur ? 'active' : ''}" data-action="sess-pick-slot" data-idx="${idx}" data-hand="both">
             <div class="nb-left">
               <span class="nb-idx">${idx + 1}</span>
@@ -2843,6 +3080,9 @@
         const metaParts = [`Нед ${h.week}`, h.type === 'warmup' ? 'Разминка' : (h.weekType === 'heavy' ? 'Тяжёлая' : 'Лёгкая')];
         if (handStr) metaParts.push(handStr);
         if (h.type !== 'warmup') metaParts.push(feelLabel(h.effort));
+        const warmStr = (h.warmupSets && h.warmupSets.length)
+          ? h.warmupSets.map(s => `${fmtKg(s.weight)}×${h.type === 'static' ? (s.sec || 0) + 'с' : s.reps}`).join(' · ')
+          : '';
         return `
           <div class="card card-tight" style="margin-bottom:8px;">
             <div class="row-between" style="align-items:flex-start;">
@@ -2853,6 +3093,7 @@
               <button class="btn btn-xs btn-danger" data-action="del-hist" data-id="${h.id}">✕</button>
             </div>
             <div class="plan-sets">${esc(setsStr)}</div>
+            ${warmStr ? `<div class="small muted" style="font-size:11.5px; margin-top:3px;">Разминка: ${esc(warmStr)}</div>` : ''}
             ${h.note ? `<div class="small muted mt-6">${esc(h.note)}</div>` : ''}
           </div>
         `;
@@ -3279,6 +3520,7 @@
         sess.workStartedAt = Date.now();
         sess.restEndAt = 0;
         sess.editingSlot = null;
+        sess.lastCompleted = null;
         ui.staticTargetBeeped = false;
         saveState();
         render();
@@ -3295,35 +3537,36 @@
         const curSet = draft.sets[sess.setIdx];
         if (!curSet) return;
 
+        const completedIdx = sess.setIdx;
         curSet.done = true;
-        const isPeakSet = Boolean(curSet.isPeak || (plan.weekType === 'heavy' && sess.setIdx >= 3));
-        const fullRestSec = ((plan.sets && plan.sets[sess.setIdx]) || {}).restSec || 90;
+        curSet.feel = 'ok';
+        const isPeakSet = Boolean(curSet.isPeak || (plan.weekType === 'heavy' && completedIdx >= 3));
+        const fullRestSec = ((plan.sets && plan.sets[completedIdx]) || {}).restSec || 90;
 
         // Track last completed set for live autoregulation
         const justFinishedPair = isUni && hand === 'L';
         const draftR = isUni ? getOrInitDraft(ex, 'R', computePlan(ex, 'R', sess.week), sess.week) : draft;
-        const rightRatedSeparately = justFinishedPair && draftR.sets[sess.setIdx] && draftR.sets[sess.setIdx].feel !== 'ok';
-        sess.lastCompleted = {
-          setIdx: sess.setIdx,
-          hand,
-          weight: curSet.weight,
-          reps: curSet.reps,
-          sec: curSet.sec,
-          pairedBoth: justFinishedPair && !rightRatedSeparately
-        };
+        const draftL = isUni ? getOrInitDraft(ex, 'L', computePlan(ex, 'L', sess.week), sess.week) : null;
+        const rightRatedSeparately = justFinishedPair && draftR.sets[completedIdx] && (!draftR.sets[completedIdx].done || draftR.sets[completedIdx].feel !== 'ok');
+
         sess.editingSlot = null;
         sess.workStartedAt = 0;
 
-        // Find next undone paired slot!
-        const nextSearchHand = isUni ? (hand === 'R' ? 'L' : 'R') : 'both';
-        const nextSearchIdx = (isUni && hand === 'R') ? sess.setIdx : sess.setIdx + 1;
-        const nextSlot = findNextPairedSlot(ex, sess.week, nextSearchIdx, nextSearchHand);
+        // Find next undone paired slot (if Right of this same set was unmarked into warmup/fail, bring Right back next!)
+        let nextSlot = null;
+        if (isUni && hand === 'L' && draftR.sets[completedIdx] && !draftR.sets[completedIdx].done) {
+          nextSlot = { setIdx: completedIdx, hand: 'R' };
+        } else {
+          const nextSearchHand = isUni ? (hand === 'R' ? 'L' : 'R') : 'both';
+          const nextSearchIdx = (isUni && hand === 'R') ? completedIdx : completedIdx + 1;
+          nextSlot = findNextPairedSlot(ex, sess.week, nextSearchIdx, nextSearchHand);
+        }
 
         if (!nextSlot) {
           sess.phase = 'finish_ex';
           sess.restEndAt = 0;
           sess.restType = null;
-        } else if (isUni && hand === 'R' && nextSlot.setIdx === sess.setIdx && nextSlot.hand === 'L') {
+        } else if (isUni && hand === 'R' && nextSlot.setIdx === completedIdx && nextSlot.hand === 'L') {
           // Transition from Right -> Left of the SAME set
           sess.hand = 'L';
           sess.setIdx = nextSlot.setIdx;
@@ -3349,6 +3592,31 @@
           sess.restEndAt = Date.now() + fullRestSec * 1000;
         }
 
+        // Snapshot exact 'ok' state right after completion so live feel buttons are 100% idempotent AND stack across sets!
+        sess.lastCompleted = {
+          setIdx: completedIdx,
+          hand,
+          weight: curSet.weight,
+          reps: curSet.reps,
+          sec: curSet.sec,
+          pairedBoth: justFinishedPair && !rightRatedSeparately,
+          feel: 'ok',
+          feedback: '',
+          fromFailBtn: false,
+          snap: {
+            nextSetIdx: sess.setIdx,
+            nextHand: sess.hand,
+            nextPhase: sess.phase,
+            nextRestType: sess.restType,
+            setsR: cloneObj(draftR.sets),
+            extraR: cloneObj(draftR.extraLog || []),
+            effortR: draftR.effort,
+            setsL: isUni && draftL ? cloneObj(draftL.sets) : null,
+            extraL: isUni && draftL ? cloneObj(draftL.extraLog || []) : null,
+            effortL: isUni && draftL ? draftL.effort : null
+          }
+        };
+
         saveState();
         render();
       }
@@ -3357,32 +3625,81 @@
         if (!sess || !sess.lastCompleted) return;
         const ex = state.exercises.find(x => x.id === sess.exId);
         const feel = btn.dataset.feel;
-        const lc = sess.lastCompleted;
-        let msg = '';
-        if (lc.pairedBoth && ex.hands === 'uni') {
-          applyLiveFeel(ex, 'R', sess.week, lc.setIdx, feel);
-          msg = applyLiveFeel(ex, 'L', sess.week, lc.setIdx, feel);
-        } else {
-          msg = applyLiveFeel(ex, lc.hand, sess.week, lc.setIdx, feel);
-        }
+        applyLiveFeelOnSession(sess, ex, feel);
         saveState();
         render();
       }
       else if (act === 'sess-fail-set') {
+        unlockAudio();
         const sess = state.activeSession;
         if (!sess) return;
         const ex = state.exercises.find(x => x.id === sess.exId);
-        const hand = ex.hands === 'uni' ? sess.hand : 'both';
+        const isUni = ex.hands === 'uni';
+        const hand = isUni ? (sess.hand === 'L' ? 'L' : 'R') : 'both';
         const plan = computePlan(ex, hand, sess.week);
         const draft = getOrInitDraft(ex, hand, plan, sess.week);
-        if (draft.sets[sess.setIdx]) {
-          draft.sets[sess.setIdx].feel = 'fail';
-          if (draft.sets[sess.setIdx].reps > 1) draft.sets[sess.setIdx].reps = Math.max(0, draft.sets[sess.setIdx].reps - 1);
-        }
-        applyLiveFeel(ex, hand, sess.week, sess.setIdx, 'fail');
-        sess.editingSlot = { setIdx: sess.setIdx, hand };
+        const equip = getEquip(ex.equipId);
+        const curSet = draft.sets[sess.setIdx];
+        if (!curSet) return;
+
+        const preSnap = {
+          setIdx: sess.setIdx,
+          hand,
+          sets: cloneObj(draft.sets),
+          extra: cloneObj(draft.extraLog || []),
+          effort: draft.effort
+        };
+
+        const origW = curSet.weight, origR = curSet.reps, origSec = curSet.sec || null;
+        draft.extraLog.push({ kind: 'fail', setIdx: sess.setIdx, weight: origW, reps: origR, sec: origSec });
+        curSet.done = false;
+        curSet.feel = 'ok';
+        adjustRemainingWorkingSets(draft, sess.setIdx, -1, ex, equip, false);
+        deriveDraftEffort(draft);
+
+        const fullRestSec = ((plan.sets && plan.sets[sess.setIdx]) || {}).restSec || 90;
+        const retryRestSec = Math.min(fullRestSec, 120);
+        const retryS = draft.sets[sess.setIdx];
+        const msg = `Не засчитал ${fmtSetShort(ex, { weight: origW, reps: origR, sec: origSec })} — скинул до ${fmtSetShort(ex, retryS)}, отдохни и переделай`;
+
+        sess.phase = 'resting';
+        sess.restType = 'retry_fail';
+        sess.restTotal = retryRestSec;
+        sess.restEndAt = Date.now() + retryRestSec * 1000;
+        sess.workStartedAt = 0;
+        sess.editingSlot = null;
+        sess.lastCompleted = {
+          setIdx: sess.setIdx,
+          hand,
+          weight: origW,
+          reps: origR,
+          sec: origSec,
+          pairedBoth: false,
+          feel: 'fail',
+          feedback: msg,
+          fromFailBtn: true,
+          failUndoSnap: preSnap
+        };
         saveState();
-        showToast('Укажи сколько сделал и жми «Сделал» — оставшиеся уже скинул');
+        render();
+      }
+      else if (act === 'sess-undo-fail') {
+        const sess = state.activeSession;
+        if (!sess || !sess.lastCompleted || !sess.lastCompleted.failUndoSnap) return;
+        const ex = state.exercises.find(x => x.id === sess.exId);
+        const u = sess.lastCompleted.failUndoSnap;
+        const draft = getOrInitDraft(ex, u.hand, computePlan(ex, u.hand, sess.week), sess.week);
+        draft.sets = cloneObj(u.sets);
+        draft.extraLog = cloneObj(u.extra || []);
+        draft.effort = u.effort;
+        sess.setIdx = u.setIdx;
+        sess.hand = u.hand;
+        sess.phase = 'ready';
+        sess.restType = null;
+        sess.restEndAt = 0;
+        sess.lastCompleted = null;
+        saveState();
+        showToast('Отменил — вес подхода восстановлен');
         render();
       }
       else if (act === 'rest-adj') {
@@ -3413,6 +3730,7 @@
         sess.restType = null;
         sess.phase = 'ready';
         sess.editingSlot = null;
+        sess.lastCompleted = null;
         saveState();
         render();
       }
