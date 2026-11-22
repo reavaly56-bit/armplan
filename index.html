@@ -629,7 +629,7 @@
   (function() {
     'use strict';
 
-    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.3) ====================
+    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.4) ====================
     const STORAGE_KEY = 'armplan_zheka_state_v1';
     const IDB_NAME = 'ArmPlanZhekaDB';
     const IDB_STORE = 'kv';
@@ -659,7 +659,9 @@
       activity: '<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
       check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
       play: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>',
-      timer: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M9 2h6"/></svg>'
+      timer: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M9 2h6"/></svg>',
+      music: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+      musicOff: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="2" y1="2" x2="22" y2="22"/></svg>'
     };
 
     const DEFAULT_EQUIPMENT = {
@@ -742,7 +744,8 @@
           currentWeek: 1,
           compDate: '2027-03-15',
           elbowCare: { R: false, L: false },
-          soundEnabled: true
+          soundEnabled: true,
+          autoMusic: true
         },
         equipment: JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT)),
         exercises: JSON.parse(JSON.stringify(DEFAULT_EXERCISES)),
@@ -891,7 +894,8 @@
         currentWeek: Math.max(1, parseInt(rawSettings.currentWeek, 10) || 1),
         compDate: rawSettings.compDate || '2027-03-15',
         elbowCare,
-        soundEnabled: rawSettings.soundEnabled !== false
+        soundEnabled: rawSettings.soundEnabled !== false,
+        autoMusic: rawSettings.autoMusic !== false
       };
 
       const equipment = Object.assign({}, def.equipment, raw.equipment || {});
@@ -1452,8 +1456,36 @@
       return `${fmtKg(s.weight)}×${s.reps}`;
     }
 
-    // ==================== AUDIO & VIBRATION ====================
+    // ==================== AUDIO, VIBRATION & AUTO-MUSIC ====================
     let sharedAudioCtx = null;
+    let lastBeepEndAt = 0;
+    let autoMusicTimer = null;
+
+    function hasNativeMediaControl() {
+      try {
+        return Boolean(window.AndroidBridge && window.AndroidBridge.mediaPlay && window.AndroidBridge.mediaPause);
+      } catch {
+        return false;
+      }
+    }
+
+    function triggerMusic(play, forceManual) {
+      if (!forceManual && !state.settings.autoMusic) return false;
+      clearTimeout(autoMusicTimer);
+      const bridge = window.AndroidBridge;
+      if (!bridge || (play ? !bridge.mediaPlay : !bridge.mediaPause)) return false;
+      const run = () => {
+        try { play ? bridge.mediaPlay() : bridge.mediaPause(); } catch {}
+      };
+      // If rest-done beep just played, wait a tiny bit so AudioManager.isMusicActive() reflects external player cleanly
+      if (play && Date.now() < lastBeepEndAt) {
+        autoMusicTimer = setTimeout(run, Math.max(80, lastBeepEndAt - Date.now() + 60));
+      } else {
+        run();
+      }
+      return true;
+    }
+
     function unlockAudio() {
       try {
         const Ctx = window.AudioContext || window.webkitAudioContext;
@@ -1478,6 +1510,7 @@
         const ctx = sharedAudioCtx;
         if (ctx.state === 'suspended') ctx.resume();
         const now = ctx.currentTime;
+        lastBeepEndAt = Date.now() + 550;
         [[0, 740, 0.14], [0.22, 987.77, 0.24]].forEach(([delay, freq, dur]) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -2065,7 +2098,7 @@
         subHtml = `<div class="top-sub light"><span class="top-dot"></span>${daysLeft !== null && daysLeft >= 0 ? `До старта: ${daysLeft} дн.` : 'Дневник силы'}</div>`;
         title = 'Прогресс';
       } else if (ui.tab === 'gym') {
-        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.3</div>`;
+        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.4</div>`;
         title = 'Настройки и зал';
       }
 
@@ -2304,10 +2337,11 @@
         <div class="sess-top">
           <div class="sess-top-row">
             <button class="back-btn" data-action="exit-session">← К списку дня</button>
-            <div class="row">
+            <div class="row" style="gap:6px;">
               <span class="chip ${wType === 'heavy' ? 'chip-heavy' : 'chip-light'}">
                 Нед ${sess.week} · ${wType === 'heavy' ? 'Тяжёлая' : (wType === 'warmup' ? 'Разминка' : 'Лёгкая')}
               </span>
+              <button class="ico-btn ${state.settings.autoMusic ? 'active' : ''}" style="width:34px; height:34px;" data-action="toggle-auto-music" aria-label="Автомузыка на подходах" title="Автомузыка на подходах">${state.settings.autoMusic ? ICONS.music : ICONS.musicOff}</button>
               <button class="ico-btn" style="width:34px; height:34px;" data-action="toggle-theme">${isDark ? ICONS.sun : ICONS.moon}</button>
             </div>
           </div>
@@ -3275,7 +3309,7 @@
       if (ui.gymSub === 'program') {
         content = `
           <div class="card">
-            <div class="card-title mb-12">Оформление и таймер</div>
+            <div class="card-title mb-12">Оформление, звук и музыка</div>
             <div class="field-lbl">Тема приложения</div>
             <div class="seg" style="grid-template-columns:1fr 1fr;">
               <button class="${state.settings.theme !== 'dark' ? 'active' : ''}" data-action="set-theme" data-val="light">Светлая</button>
@@ -3284,6 +3318,17 @@
             <div class="row-between mt-12">
               <span class="small">Звук, когда отдых закончился</span>
               <input type="checkbox" ${state.settings.soundEnabled !== false ? 'checked' : ''} data-action="set-sound" style="width:20px; height:20px;" />
+            </div>
+            <div style="border-top:1px solid var(--border-soft); margin-top:12px; padding-top:12px;">
+              <div class="row-between">
+                <span class="small" style="font-weight:700;">Автомузыка на подходах</span>
+                <input type="checkbox" ${state.settings.autoMusic ? 'checked' : ''} data-action="set-auto-music" style="width:20px; height:20px; accent-color:var(--blue);" />
+              </div>
+              <div class="tiny muted mt-4">На подходе и паузе П→Л музыка играет, на отдыхе ставится на паузу. Работает со Spotify, Яндекс.Музыкой и др. (плеер должен быть запущен в фоне).</div>
+              <div class="grid-2 mt-8">
+                <button class="btn btn-sm" data-action="test-music" data-cmd="play">▶ Проверить Плей</button>
+                <button class="btn btn-sm" data-action="test-music" data-cmd="pause">⏸ Проверить Паузу</button>
+              </div>
             </div>
           </div>
 
@@ -3501,6 +3546,18 @@
         saveState();
         render();
       }
+      else if (act === 'toggle-auto-music') {
+        state.settings.autoMusic = !state.settings.autoMusic;
+        saveState();
+        showToast(state.settings.autoMusic ? 'Автомузыка: подход ▶ / отдых ⏸' : 'Автомузыка выключена');
+        render();
+      }
+      else if (act === 'test-music') {
+        const isPlay = btn.dataset.cmd === 'play';
+        const ok = triggerMusic(isPlay, true);
+        if (ok) showToast(isPlay ? 'Отправил плееру: ▶ Плей' : 'Отправил плееру: ⏸ Пауза');
+        else showToast('Работает в Android-приложении ArmPlan');
+      }
       else if (act === 'toggle-gym') {
         if (ui.tab === 'gym') ui.tab = ui.prevTab || 'workout';
         else { ui.prevTab = ui.tab; ui.tab = 'gym'; }
@@ -3630,6 +3687,7 @@
         sess.editingSlot = null;
         sess.lastCompleted = null;
         ui.staticTargetBeeped = false;
+        triggerMusic(true);
         saveState();
         render();
       }
@@ -3674,8 +3732,9 @@
           sess.phase = 'finish_ex';
           sess.restEndAt = 0;
           sess.restType = null;
+          triggerMusic(false);
         } else if (isUni && hand === 'R' && nextSlot.setIdx === completedIdx && nextSlot.hand === 'L') {
-          // Transition from Right -> Left of the SAME set
+          // Transition from Right -> Left of the SAME set (music keeps playing!)
           sess.hand = 'L';
           sess.setIdx = nextSlot.setIdx;
           if (isPeakSet && ex.type !== 'warmup') {
@@ -3691,13 +3750,14 @@
             sess.restEndAt = 0;
           }
         } else {
-          // Full rest before next set!
+          // Full rest before next set -> pause music!
           sess.setIdx = nextSlot.setIdx;
           sess.hand = nextSlot.hand;
           sess.phase = 'resting';
           sess.restType = 'between_sets';
           sess.restTotal = fullRestSec;
           sess.restEndAt = Date.now() + fullRestSec * 1000;
+          triggerMusic(false);
         }
 
         // Snapshot exact 'ok' state right after completion so live feel buttons are 100% idempotent AND stack across sets!
@@ -3732,8 +3792,12 @@
         const sess = state.activeSession;
         if (!sess || !sess.lastCompleted) return;
         const ex = state.exercises.find(x => x.id === sess.exId);
+        const wasBetweenHands = sess.restType === 'between_hands';
         const feel = btn.dataset.feel;
         applyLiveFeelOnSession(sess, ex, feel);
+        if (wasBetweenHands && sess.phase === 'resting' && sess.restType !== 'between_hands') {
+          triggerMusic(false);
+        }
         saveState();
         render();
       }
@@ -3776,6 +3840,7 @@
         sess.restEndAt = Date.now() + retryRestSec * 1000;
         sess.workStartedAt = 0;
         sess.editingSlot = null;
+        triggerMusic(false);
         sess.lastCompleted = {
           setIdx: sess.setIdx,
           hand,
@@ -3828,6 +3893,7 @@
         sess.phase = 'resting';
         sess.restTotal = 30;
         sess.restEndAt = Date.now() + 30000;
+        triggerMusic(false);
         saveState();
         render();
       }
@@ -4091,6 +4157,7 @@
           sess.editingSlot = null;
           sess.lastCompleted = null;
           ui.editBaseOpen = false;
+          triggerMusic(false);
           saveState();
           showToast(`Сохранено! Отдых ${fmtTime(restAfter)}`);
           render();
@@ -4266,6 +4333,7 @@
       else if (act === 'hist-filter') { ui.histFilter = el.value; render(); }
       else if (act === 'set-comp') { state.settings.compDate = el.value; saveState(); render(); }
       else if (act === 'set-sound') { state.settings.soundEnabled = Boolean(el.checked); saveState(); }
+      else if (act === 'set-auto-music') { state.settings.autoMusic = Boolean(el.checked); saveState(); render(); }
       else if (act === 'upd-equip') {
         const eq = state.equipment[el.dataset.id];
         if (!eq) return;
