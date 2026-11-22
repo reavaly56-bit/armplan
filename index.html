@@ -1093,6 +1093,11 @@
     // ==================== REST TIMER ====================
     function beep() {
       try {
+        if (window.AndroidBridge && window.AndroidBridge.vibrate) {
+          window.AndroidBridge.vibrate();
+        }
+      } catch {}
+      try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -2370,16 +2375,25 @@
         render();
       }
       else if (act === 'export-file') {
-        const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `armplan-backup-${new Date().toISOString().slice(0, 10)}.json`;
-        a.click();
-        showToast('Файл резервной копии скачан');
+        const jsonStr = JSON.stringify(state, null, 2);
+        const fname = `armplan-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        if (window.AndroidBridge && window.AndroidBridge.shareBackup) {
+          window.AndroidBridge.shareBackup(jsonStr, fname);
+          showToast('Выбери куда сохранить резервную копию');
+        } else {
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = fname;
+          a.click();
+          showToast('Файл резервной копии скачан');
+        }
       }
       else if (act === 'export-copy') {
         const txt = JSON.stringify(state);
-        if (navigator.clipboard && navigator.clipboard.writeText) {
+        if (window.AndroidBridge && window.AndroidBridge.copyText && window.AndroidBridge.copyText(txt)) {
+          showToast('Код скопирован! Сохрани его в Заметках');
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(txt).then(() => showToast('Код скопирован! Сохрани его в Заметках'));
         } else {
           const ta = document.getElementById('import-text');
@@ -2524,8 +2538,28 @@
       }
     });
 
+    // ==================== ANDROID BACK BUTTON ====================
+    window.__armplanBack = function() {
+      if (ui.expandedExId) {
+        ui.expandedExId = null;
+        render();
+        return true;
+      }
+      if (ui.factorsOpen) {
+        ui.factorsOpen = false;
+        render();
+        return true;
+      }
+      if (ui.tab !== 'workout') {
+        ui.tab = 'workout';
+        render();
+        return true;
+      }
+      return false;
+    };
+
     // ==================== INIT ====================
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http') && location.hostname !== 'appassets.androidplatform.net') {
       navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
 
