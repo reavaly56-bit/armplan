@@ -1,4 +1,4 @@
-const CACHE_NAME = 'armplan-v3';
+const CACHE_NAME = 'armplan-v4';
 const ASSETS = [
   './',
   './index.html',
