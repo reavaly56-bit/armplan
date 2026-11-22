@@ -458,7 +458,7 @@
     const STORAGE_KEY = 'armplan_zheka_state_v1';
     const IDB_NAME = 'ArmPlanZhekaDB';
     const IDB_STORE = 'kv';
-    const APP_STATE_VERSION = 2;
+    const APP_STATE_VERSION = 3;
 
     const PERIODS = {
       prep:  { name: 'Подготовка',    mult: 0.90 },
@@ -493,16 +493,16 @@
         name: 'Штанга (20 кг)',
         mode: 'step',
         min: 20,
-        step: 1.25,
-        note: 'Гриф 20 кг, шаг 1.25 кг'
+        step: 2.5,
+        note: 'Гриф 20 кг, блины по 1.25 с каждой стороны = шаг 2.5 кг'
       },
       barbell8: {
         id: 'barbell8',
         name: 'Кривой гриф (8 кг)',
         mode: 'step',
         min: 8,
-        step: 1.25,
-        note: 'Гриф 8 кг, шаг 1.25 кг'
+        step: 2.5,
+        note: 'Гриф 8 кг, блины по 1.25 с каждой стороны = шаг 2.5 кг'
       },
       plates: {
         id: 'plates',
@@ -669,7 +669,7 @@
         merged.settings.elbowPain = { R: 0, L: 0 };
       }
 
-      // Smooth migration v1 -> v2 (preserves all baseline1RM, history, custom equipment & exercises!)
+      // Smooth migration v1 -> v2 -> v3 (preserves all baseline1RM, history, custom equipment & exercises!)
       const pronIds = new Set(['d4_pron_classic', 'd4_pron_thumb', 'd4_pron_low']);
       merged.exercises = merged.exercises.map(ex => {
         const ref = DEFAULT_EX_MAP[ex.id];
@@ -683,8 +683,20 @@
         return copy;
       });
 
-      // On v1 -> v2 upgrade, clear untouched drafts so updated deload weights appear immediately
-      if (oldVer < 2) {
+      // v3 migration: barbell step 1.25 -> 2.5 kg (1.25 plate on each side = 2.5 kg total)
+      if (oldVer < 3) {
+        if (merged.equipment.barbell20 && merged.equipment.barbell20.step === 1.25) {
+          merged.equipment.barbell20.step = 2.5;
+          merged.equipment.barbell20.note = 'Гриф 20 кг, блины по 1.25 с каждой стороны = шаг 2.5 кг';
+        }
+        if (merged.equipment.barbell8 && merged.equipment.barbell8.step === 1.25) {
+          merged.equipment.barbell8.step = 2.5;
+          merged.equipment.barbell8.note = 'Гриф 8 кг, блины по 1.25 с каждой стороны = шаг 2.5 кг';
+        }
+      }
+
+      // On upgrade, clear untouched drafts so updated weights appear immediately
+      if (oldVer < APP_STATE_VERSION) {
         for (const k of Object.keys(merged.drafts)) {
           const d = merged.drafts[k];
           if (!d || !d.sets || !d.sets.some(s => s.done)) {
@@ -859,6 +871,53 @@
     }
 
     // ==================== CORE AUTO-PLAN ENGINE ====================
+    function stepOneHeavyWeek(cur1RM, curRepBoost, peakPct, equip, isBW, bw) {
+      if (isBW) {
+        return {
+          oneRM: round2(cur1RM + Math.max(1.25, equip.step || 1.25)),
+          repBoost: 0,
+          note: ''
+        };
+      }
+      const curPeakW = snapWeight(cur1RM * peakPct, equip).weight;
+      const nextW = stepWeightBy(curPeakW, +1, equip);
+      if (nextW > curPeakW + 0.01) {
+        const jumpRatio = curPeakW > 0 ? (nextW - curPeakW) / curPeakW : 0;
+        if (jumpRatio > 0.15) {
+          if (curRepBoost < 2) {
+            return {
+              oneRM: cur1RM,
+              repBoost: 2,
+              note: `До следующего снаряда (${fmtKg(nextW)} кг) большой шаг — сначала делаем +2 повтора, потом переход.`
+            };
+          }
+          return {
+            oneRM: round2(nextW / peakPct),
+            repBoost: 0,
+            note: ''
+          };
+        }
+        return {
+          oneRM: round2(nextW / peakPct),
+          repBoost: 0,
+          note: ''
+        };
+      }
+      // At max dumbbell in list
+      return {
+        oneRM: cur1RM,
+        repBoost: Math.min(4, curRepBoost + 2),
+        note: 'Дошли до макс. гантели — делаем +2 повтора (или добавь новый вес в «Зал»).'
+      };
+    }
+
+    function firstHeavyWeekFor(ex) {
+      for (let w = 1; w <= 8; w++) {
+        if (getEffectiveWeekType(ex, w) === 'heavy') return w;
+      }
+      return 1;
+    }
+
     function computePlan(ex, hand, targetWeek, opts) {
       const options = opts || {};
       const deloadMode = ex.deloadMode || 'working';
@@ -869,14 +928,6 @@
       const pain = getElbowPainFor(ex, hand, painObj);
       const elbow = getElbowFactor(pain);
       const energyMult = (!options.isForecast && state.settings.energy === 'low') ? 0.92 : 1.0;
-
-      // Count heavy weeks ahead for THIS exercise
-      let heavyAhead = 0;
-      if (targetWeek > state.settings.currentWeek) {
-        for (let w = state.settings.currentWeek + 1; w <= targetWeek; w++) {
-          if (getEffectiveWeekType(ex, w) === 'heavy') heavyAhead++;
-        }
-      }
 
       // 1. TABLE WORK
       if (ex.type === 'table') {
@@ -903,7 +954,7 @@
 
       // 2. STATIC HOLD (Fingers plate hold)
       if (ex.type === 'static') {
-        const recs = getHistoryFor(ex.id, hand);
+        const recs = getHistoryFor(ex.id, hand).filter(r => r.week <= targetWeek);
         const last = recs[0];
         let baseWeight = (ex.baseline1RM && ex.baseline1RM[hand]) ? Number(ex.baseline1RM[hand]) : null;
         let progTag = '';
@@ -912,23 +963,36 @@
           if (bestW > 0) {
             const wasSoft = last.weekType === 'light' && (last.deloadMode === 'light' || !last.deloadMode);
             baseWeight = wasSoft ? bestW / 0.72 : (last.weekType === 'light' ? bestW / 0.85 : bestW);
-            if (last.weekType === 'heavy' && targetWeek > last.week) {
-              if (last.effort === 'easy' || last.effort === 'ok') {
-                baseWeight = stepWeightBy(baseWeight, +1, equip);
-                progTag = '+шаг';
-              } else if (last.effort === 'fail') {
+            let hSteps = 0;
+            for (let w = last.week + 1; w <= targetWeek; w++) {
+              if (getEffectiveWeekType(ex, w) === 'heavy') hSteps++;
+            }
+            if (hSteps > 0) {
+              if (last.effort === 'fail') {
                 baseWeight = stepWeightBy(baseWeight, -1, equip);
                 progTag = '−шаг';
+              } else if (last.effort === 'hard') {
+                progTag = 'закрепляем';
+              } else {
+                for (let i = 0; i < hSteps; i++) baseWeight = stepWeightBy(baseWeight, +1, equip);
+                progTag = '+шаг';
               }
             }
           }
+        } else if (baseWeight !== null) {
+          const fh = firstHeavyWeekFor(ex);
+          let hSteps = 0;
+          for (let w = fh + 1; w <= targetWeek; w++) {
+            if (getEffectiveWeekType(ex, w) === 'heavy') hSteps++;
+          }
+          for (let i = 0; i < hSteps; i++) baseWeight = stepWeightBy(baseWeight, +1, equip);
+          if (hSteps > 0 && weekType === 'heavy') progTag = `+${hSteps} шаг`;
         }
         if (baseWeight === null) {
           return { type: 'static', weekType, deloadMode, elbow, pain, needsCalibration: true, sets: [], modeLabel: 'Удержание' };
         }
         const lightMult = deloadMode === 'light' ? 0.70 : 0.85;
         let targetW = baseWeight * (weekType === 'heavy' ? 1.0 : lightMult) * period.mult * elbow.mult * energyMult;
-        if (heavyAhead > 0) targetW *= Math.pow(1.03, heavyAhead);
         const snapped = snapWeight(targetW, equip);
         const secTarget = weekType === 'heavy' ? 15 : (deloadMode === 'light' ? 30 : 20);
         const sets = [1, 2, 3, 4].map((n, idx) => ({
@@ -949,11 +1013,42 @@
       // 3. WEIGHTED & BODYWEIGHT (PYRAMID)
       const isBW = ex.type === 'bodyweight';
       const bw = Number(state.settings.bodyweight) || 75;
-      const recs = getHistoryFor(ex.id, hand);
+      const is42 = state.settings.heavyScheme === '8-6-6-4-2';
+      const heavyPcts = is42 ? [0.60, 0.72, 0.78, 0.86, 0.94] : [0.60, 0.72, 0.78, 0.87, 0.92];
+      const peakPct = heavyPcts[4];
+      const targetPeakReps = is42 ? 2 : 3;
+
+      const allRecs = getHistoryFor(ex.id, hand);
+      // Only consider records up to targetWeek so viewing earlier weeks stays accurate
+      const recs = allRecs.filter(r => r.week <= targetWeek);
       const lastHeavy = recs.find(r => r.weekType === 'heavy');
       const lastAny = recs[0];
 
-      let base1RM = null;
+      // Determine scheme & percentages for targetWeek
+      let schemeReps, pcts, modeLabel, modeTone;
+      if (weekType === 'heavy') {
+        schemeReps = is42 ? [8, 6, 6, 4, 2] : [8, 6, 6, 3, 3];
+        pcts = heavyPcts;
+        const cycleIdx = ((targetWeek - 1) % 4) + 1;
+        modeLabel = deloadMode === 'every4'
+          ? `🔥 Тяжёлая · ${cycleIdx}/3`
+          : `🔥 Тяжёлая · ${state.settings.heavyScheme}`;
+        modeTone = 'heavy';
+      } else if (deloadMode === 'light') {
+        schemeReps = [10, 10, 10, 8, 8];
+        pcts = [0.50, 0.52, 0.55, 0.58, 0.60];
+        modeLabel = '🛡️ Бережём локоть · 50–60%';
+        modeTone = 'safe';
+      } else {
+        schemeReps = [10, 10, 8, 8];
+        pcts = [0.65, 0.70, 0.74, 0.78];
+        modeLabel = deloadMode === 'every4'
+          ? '🌿 Разгрузка · 10-10-8-8'
+          : '🌿 Лёгкая · 10-10-8-8';
+        modeTone = 'normal';
+      }
+
+      let effective1RM = null;
       let progTag = '';
       let repBoost = 0;
       let doubleProgNote = '';
@@ -963,92 +1058,128 @@
         const normalized1RM = savedElbowMult < 1 ? round2(Number(lastHeavy.e1rm) / savedElbowMult) : Number(lastHeavy.e1rm);
         const prevHealthy = recs.find(r => r.weekType === 'heavy' && (!r.elbowPain || r.elbowPain < 3) && r.e1rm > 0);
         const baselineVal = (ex.baseline1RM && ex.baseline1RM[hand] > 0) ? Number(ex.baseline1RM[hand]) : 0;
-        base1RM = (lastHeavy.elbowPain >= 3)
+        let anchor1RM = (lastHeavy.elbowPain >= 3)
           ? Math.max(normalized1RM, prevHealthy ? Number(prevHealthy.e1rm) : 0, baselineVal)
           : normalized1RM;
 
-        const isLaterWeek = targetWeek > lastHeavy.week;
-        const lastPeakSet = lastHeavy.sets && lastHeavy.sets.length ? lastHeavy.sets[lastHeavy.sets.length - 1] : null;
-        const lastPeakW = lastPeakSet ? Number(lastPeakSet.weight) || 0 : 0;
-        const nextW = stepWeightBy(lastPeakW, +1, equip);
-        const jumpRatio = lastPeakW > 0 ? (nextW - lastPeakW) / lastPeakW : 0;
-
-        if (isLaterWeek) {
-          if (lastHeavy.effort === 'easy') {
-            if (isBW) {
-              base1RM += Math.max(1.25, equip.step || 1.25);
-            } else if (nextW > lastPeakW) {
-              base1RM *= Math.max(1.03, Math.min(1.10, nextW / Math.max(1, lastPeakW)));
-            } else {
-              repBoost = 2;
-              doubleProgNote = 'Макс. гантель в списке — делаем +2 повтора (или добавь новый вес в «Зал»).';
-            }
-            progTag = '+шаг';
-          } else if (lastHeavy.effort === 'ok') {
-            if (!isBW && jumpRatio > 0.12 && (!lastHeavy.elbowPain || lastHeavy.elbowPain < 3)) {
-              const targetPeakReps = state.settings.heavyScheme === '8-6-6-4-2' ? 2 : 3;
-              const donePeakReps = lastPeakSet ? Number(lastPeakSet.reps) || 0 : 0;
-              if (donePeakReps >= targetPeakReps + 2) {
-                base1RM = epley1RM(nextW, targetPeakReps);
-                progTag = `→ ${fmtKg(nextW)} кг`;
-              } else {
-                repBoost = 2;
-                doubleProgNote = `До следующей гантели (${fmtKg(nextW)} кг) большой шаг — сначала +2 повтора, потом переход.`;
-                progTag = '+2 повт';
-              }
-            } else {
-              base1RM *= 1.025;
-              progTag = '+шаг';
-            }
-          } else if (lastHeavy.effort === 'hard') {
-            progTag = 'закрепляем';
-          } else if (lastHeavy.effort === 'fail') {
-            base1RM *= 0.94;
-            progTag = '−6%';
+        // Best actual set from lastHeavy
+        let actualPeakW = 0, actualPeakReps = targetPeakReps;
+        for (const s of (lastHeavy.sets || [])) {
+          const w = Number(s.weight) || 0;
+          const r = Number(s.reps) || 0;
+          if (w > actualPeakW || (w === actualPeakW && r > actualPeakReps)) {
+            actualPeakW = w;
+            actualPeakReps = r;
           }
         }
-      } else if (lastAny && lastAny.e1rm > 0) {
-        const maxW = Math.max(...(lastAny.sets || []).map(s => Number(s.weight) || 0));
-        if (isBW) {
-          base1RM = Math.max(lastAny.e1rm, bw + maxW);
-        } else if (lastAny.deloadMode === 'working') {
-          base1RM = Math.max(lastAny.e1rm, maxW / 0.78);
-        } else {
-          base1RM = Math.max(lastAny.e1rm, maxW / 0.58);
+
+        // Count heavy weeks after lastHeavy up to targetWeek
+        let heavySteps = 0;
+        for (let w = lastHeavy.week + 1; w <= targetWeek; w++) {
+          if (getEffectiveWeekType(ex, w) === 'heavy') heavySteps++;
         }
-      } else if (ex.baseline1RM && ex.baseline1RM[hand] > 0) {
-        base1RM = Number(ex.baseline1RM[hand]);
-      }
 
-      // Determine scheme & percentages
-      let schemeReps, pcts, modeLabel, modeTone;
-      if (weekType === 'heavy') {
-        schemeReps = state.settings.heavyScheme === '8-6-6-4-2' ? [8, 6, 6, 4, 2] : [8, 6, 6, 3, 3];
-        pcts = state.settings.heavyScheme === '8-6-6-4-2'
-          ? [0.60, 0.72, 0.78, 0.86, 0.94]
-          : [0.60, 0.72, 0.78, 0.87, 0.91];
-        const cycleIdx = ((targetWeek - 1) % 4) + 1;
-        modeLabel = deloadMode === 'every4'
-          ? `🔥 Тяжёлая (${cycleIdx} из 3) · ${state.settings.heavyScheme}`
-          : `🔥 Тяжёлая · ${state.settings.heavyScheme}`;
-        modeTone = 'heavy';
-      } else if (deloadMode === 'light') {
-        // Protective side-pressure deload (50-60%, 5 sets)
-        schemeReps = [10, 10, 10, 8, 8];
-        pcts = [0.50, 0.52, 0.55, 0.58, 0.60];
-        modeLabel = '🛡️ Бережём локоть · 50–60%';
-        modeTone = 'safe';
+        if (heavySteps === 0) {
+          effective1RM = anchor1RM;
+        } else {
+          const plannedW = Number(lastHeavy.plannedPeakW) || 0;
+          const plannedR = Number(lastHeavy.plannedPeakReps) || targetPeakReps;
+          const missedPlan = plannedW > 0 && (
+            actualPeakW < plannedW - 0.01 ||
+            (Math.abs(actualPeakW - plannedW) <= 0.01 && actualPeakReps < plannedR)
+          );
+          const beatReps = actualPeakReps >= targetPeakReps + 2;
+
+          let cur1RM = (!isBW && actualPeakW > 0 && (!lastHeavy.elbowPain || lastHeavy.elbowPain < 3))
+            ? round2(actualPeakW / peakPct)
+            : anchor1RM;
+          let curRepBoost = 0;
+
+          // Step 1 immediately after lastHeavy
+          if (lastHeavy.effort === 'fail') {
+            if (isBW) {
+              cur1RM = Math.max(bw, round2(anchor1RM - Math.max(1.25, equip.step || 1.25)));
+            } else {
+              const prevW = stepWeightBy(actualPeakW, -1, equip);
+              cur1RM = round2(prevW / peakPct);
+            }
+            progTag = '−1 шаг';
+          } else if (lastHeavy.effort === 'hard') {
+            progTag = 'закрепляем';
+          } else if (missedPlan) {
+            if (!isBW && actualPeakW < plannedW - 0.01) {
+              // Dropped weight: step +1 from what was actually done, never exceeding missed goal
+              const retryW = Math.min(plannedW, stepWeightBy(actualPeakW, +1, equip));
+              cur1RM = round2(retryW / peakPct);
+            } else if (!isBW) {
+              // Hit weight but fewer reps: retry the same planned weight
+              cur1RM = round2(plannedW / peakPct);
+            }
+            progTag = 'повтор цели';
+          } else {
+            // Hit or beat plan with easy/ok effort -> advance!
+            const startPeakW = isBW ? Math.max(0, cur1RM * peakPct - bw) : snapWeight(cur1RM * peakPct, equip).weight;
+            const res = stepOneHeavyWeek(cur1RM, beatReps ? 2 : 0, peakPct, equip, isBW, bw);
+            cur1RM = res.oneRM;
+            curRepBoost = res.repBoost;
+            if (res.note) doubleProgNote = res.note;
+            const endPeakW = isBW ? Math.max(0, cur1RM * peakPct - bw) : snapWeight(cur1RM * peakPct, equip).weight;
+            if (curRepBoost > 0) progTag = '+2 повт';
+            else if (endPeakW > startPeakW + 0.01) progTag = `+${fmtKg(endPeakW - startPeakW)} кг`;
+            else progTag = '+шаг';
+          }
+
+          // Additional future heavy weeks beyond the first
+          for (let s = 1; s < heavySteps; s++) {
+            const res = stepOneHeavyWeek(cur1RM, curRepBoost, peakPct, equip, isBW, bw);
+            cur1RM = res.oneRM;
+            curRepBoost = res.repBoost;
+            if (res.note) doubleProgNote = res.note;
+          }
+
+          effective1RM = cur1RM;
+          repBoost = curRepBoost;
+        }
       } else {
-        // Zheka's working deload: 4 sets 10-10-8-8 with working middle weights (65-78%)
-        schemeReps = [10, 10, 8, 8];
-        pcts = [0.65, 0.70, 0.74, 0.78];
-        modeLabel = deloadMode === 'every4'
-          ? '🌿 Разгрузка (4-я нед.) · 10-10-8-8'
-          : '🌿 Лёгкая · 10-10-8-8';
-        modeTone = 'normal';
+        // No heavy history yet: use last light record or baseline1RM
+        let start1RM = null;
+        if (lastAny && lastAny.e1rm > 0) {
+          const maxW = Math.max(...(lastAny.sets || []).map(s => Number(s.weight) || 0));
+          if (isBW) start1RM = Math.max(lastAny.e1rm, bw + maxW);
+          else if (lastAny.deloadMode === 'working') start1RM = Math.max(lastAny.e1rm, maxW / 0.78);
+          else start1RM = Math.max(lastAny.e1rm, maxW / 0.58);
+        } else if (ex.baseline1RM && ex.baseline1RM[hand] > 0) {
+          start1RM = Number(ex.baseline1RM[hand]);
+        }
+
+        if (start1RM !== null) {
+          const fh = firstHeavyWeekFor(ex);
+          // Count planned heavy progression steps strictly after firstHeavyWeek
+          let plannedSteps = 0;
+          const endW = weekType === 'heavy' ? targetWeek : targetWeek - 1;
+          for (let w = fh + 1; w <= endW; w++) {
+            if (getEffectiveWeekType(ex, w) === 'heavy') plannedSteps++;
+          }
+          let cur1RM = start1RM;
+          let curRepBoost = 0;
+          const basePeakW = isBW ? Math.max(0, cur1RM * peakPct - bw) : snapWeight(cur1RM * peakPct, equip).weight;
+          for (let s = 0; s < plannedSteps; s++) {
+            const res = stepOneHeavyWeek(cur1RM, curRepBoost, peakPct, equip, isBW, bw);
+            cur1RM = res.oneRM;
+            curRepBoost = res.repBoost;
+            if (res.note) doubleProgNote = res.note;
+          }
+          effective1RM = cur1RM;
+          repBoost = curRepBoost;
+          if (plannedSteps > 0 && weekType === 'heavy') {
+            const newPeakW = isBW ? Math.max(0, cur1RM * peakPct - bw) : snapWeight(cur1RM * peakPct, equip).weight;
+            if (curRepBoost > 0) progTag = '+2 повт';
+            else if (newPeakW > basePeakW + 0.01) progTag = `+${fmtKg(newPeakW - basePeakW)} кг`;
+          }
+        }
       }
 
-      if (base1RM === null) {
+      if (effective1RM === null) {
         return {
           type: ex.type, weekType, deloadMode, elbow, pain, needsCalibration: true,
           schemeReps, modeLabel, modeTone,
@@ -1059,11 +1190,6 @@
             restSec: weekType === 'light' ? 90 : (i < 2 ? 90 : i === 2 ? 150 : 210)
           }))
         };
-      }
-
-      let effective1RM = base1RM;
-      if (heavyAhead > 0) {
-        effective1RM = base1RM * Math.pow(1.025, heavyAhead);
       }
 
       const totalMult = period.mult * elbow.mult * energyMult;
@@ -1309,6 +1435,7 @@
         }
       }
 
+      const plannedPeakSet = (plan.sets && plan.sets.length) ? plan.sets[plan.sets.length - 1] : null;
       state.history.push({
         id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
         date: today,
@@ -1324,6 +1451,8 @@
         hand,
         type: ex.type,
         sets: setsSnapshot,
+        plannedPeakW: plannedPeakSet ? Number(plannedPeakSet.weight) || 0 : 0,
+        plannedPeakReps: plannedPeakSet ? Number(plannedPeakSet.reps) || 0 : 0,
         effort: draft.effort || 'ok',
         elbowPain: pain,
         elbowMult: getElbowFactor(pain).mult,
@@ -1332,6 +1461,7 @@
       });
 
       delete state.drafts[draftKey(wk, ex.id, hand)];
+      clearUntouchedDraftsFor(ex.id);
       saveState();
 
       const hLabel = hand === 'R' ? ' (П)' : hand === 'L' ? ' (Л)' : '';
@@ -1615,7 +1745,15 @@
             ${!plan.needsCalibration ? `<button class="btn btn-xs" data-action="close-calib">✕</button>` : ''}
           </div>
           <div class="small muted" style="margin-top:2px;">
-            ${ex.type === 'bodyweight' ? 'Вес на поясе (0 = свой вес) и повторы:' : (ex.type === 'static' ? 'Рабочий вес блинов (кг):' : 'Впиши плотный рабочий вес и повторы — распишу подходы:')}
+            ${ex.type === 'bodyweight'
+              ? 'Вес на поясе (0 = свой вес) и повторы:'
+              : (ex.type === 'static'
+                ? 'Рабочий вес блинов (кг):'
+                : (ex.equipId === 'barbell20'
+                  ? 'Общий вес с грифом (20 кг) и повторы:'
+                  : (ex.equipId === 'barbell8'
+                    ? 'Общий вес с грифом (8 кг) и повторы:'
+                    : 'Впиши рабочий вес и повторы — распишу подходы:')))}
           </div>
           <div class="calib-row">
             <input id="calib-w-${ex.id}-${hand}" class="inp" type="number" step="0.25" inputmode="decimal" placeholder="Кг" style="flex:1;" />
@@ -1630,12 +1768,12 @@
 
       const modeStrip = !plan.needsCalibration ? `
         <div class="mode-strip ${plan.modeTone || ''}">
-          <div>
+          <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
             <strong>${esc(plan.modeLabel)}</strong>
-            ${plan.progTag ? `<span class="badge badge-sm badge-accent" style="margin-left:5px;">${esc(plan.progTag)}</span>` : ''}
+            ${plan.progTag ? `<span class="badge badge-sm badge-accent">${esc(plan.progTag)}</span>` : ''}
           </div>
           <button class="mode-base-btn" data-action="open-calib" data-key="${editKey}">
-            макс ~${fmtKg(plan.base1RM)} кг ✎
+            макс ~${Math.round(plan.base1RM)} кг ✎
           </button>
         </div>
       ` : '';
@@ -1691,7 +1829,7 @@
           <div class="set-head">
             <div>#</div>
             <div>План</div>
-            <div>Вес (кг)</div>
+            <div>Факт (кг)</div>
             <div>${isStatic ? 'Сек' : 'Повт'}</div>
             <div>✓</div>
           </div>
@@ -2294,9 +2432,10 @@
           ex.baseline1RM[hand] = epley1RM(w, r);
         }
         delete state.drafts[draftKey(state.settings.currentWeek, exId, hand)];
+        clearUntouchedDraftsFor(exId);
         ui.editBaseKey = null;
         saveState();
-        showToast(`Готово! Расчётный макс ~${fmtKg(ex.baseline1RM[hand])} кг`);
+        showToast(`Готово! Макс ~${Math.round(ex.baseline1RM[hand])} кг`);
         render();
       }
       else if (act === 'set-w-step') {
