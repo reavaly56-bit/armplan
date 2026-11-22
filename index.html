@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1120" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>ArmPlan — Программа Золоева 3.0</title>
+  <title>ArmPlan</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" type="image/png" href="./icon-192.png" />
   <style>
@@ -21,9 +21,9 @@
       --accent: #38bdf8;
       --accent-dark: #0284c7;
       --heavy: #f59e0b;
-      --heavy-bg: rgba(245, 158, 11, 0.14);
+      --heavy-bg: rgba(245, 158, 11, 0.15);
       --light: #10b981;
-      --light-bg: rgba(16, 185, 129, 0.14);
+      --light-bg: rgba(16, 185, 129, 0.15);
       --danger: #f43f5e;
       --danger-bg: rgba(244, 63, 94, 0.14);
       --ok: #22c55e;
@@ -36,7 +36,7 @@
       margin: 0; padding: 0;
       background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 15px; line-height: 1.4;
+      font-size: 15px; line-height: 1.38;
       overscroll-behavior-y: contain;
     }
 
@@ -51,17 +51,15 @@
     /* Top Header */
     .topbar {
       position: sticky; top: 0; z-index: 30;
-      background: rgba(11, 17, 32, 0.94);
+      background: rgba(11, 17, 32, 0.95);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 12px 14px 10px;
+      padding: 11px 14px;
     }
     .topbar-row {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
     }
-    .brand {
-      display: flex; align-items: center; gap: 9px;
-    }
+    .brand { display: flex; align-items: center; gap: 9px; }
     .brand-logo {
       width: 32px; height: 32px; border-radius: 9px;
       background: linear-gradient(135deg, #0ea5e9, #1d4ed8);
@@ -70,14 +68,15 @@
       box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
       flex-shrink: 0;
     }
-    .brand-title { font-weight: 800; font-size: 16px; letter-spacing: 0.2px; }
-    .brand-sub { font-size: 11px; color: var(--muted); }
+    .brand-title { font-weight: 800; font-size: 16px; }
+    .brand-sub { font-size: 11.5px; color: var(--muted); }
 
     .badge {
-      display: inline-flex; align-items: center; gap: 5px;
+      display: inline-flex; align-items: center; gap: 4px;
       padding: 4px 10px; border-radius: 999px;
       font-size: 12px; font-weight: 700; white-space: nowrap;
     }
+    .badge-sm { padding: 2px 7px; font-size: 10.5px; }
     .badge-heavy { background: var(--heavy-bg); color: var(--heavy); border: 1px solid rgba(245, 158, 11, 0.35); }
     .badge-light { background: var(--light-bg); color: var(--light); border: 1px solid rgba(16, 185, 129, 0.35); }
     .badge-accent { background: rgba(56, 189, 248, 0.14); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.3); }
@@ -92,11 +91,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 13px;
-      margin-bottom: 11px;
-    }
-    .card-header {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .card-title { font-weight: 700; font-size: 15px; }
 
@@ -112,7 +107,7 @@
       padding: 10px 14px; border-radius: 11px;
       font-size: 14px; font-weight: 700;
       background: var(--card2); border: 1px solid var(--border);
-      min-height: 42px;
+      min-height: 44px;
     }
     .btn-primary {
       background: linear-gradient(135deg, #0ea5e9, #2563eb);
@@ -125,23 +120,23 @@
     .btn-danger {
       background: var(--danger-bg); border-color: rgba(244, 63, 94, 0.4); color: var(--danger);
     }
-    .btn-sm { padding: 6px 10px; font-size: 12.5px; min-height: 34px; border-radius: 9px; }
-    .btn-xs { padding: 4px 8px; font-size: 12px; min-height: 30px; border-radius: 8px; }
+    .btn-sm { padding: 7px 11px; font-size: 13px; min-height: 36px; border-radius: 9px; }
+    .btn-xs { padding: 5px 9px; font-size: 12px; min-height: 32px; border-radius: 8px; }
     .btn-block { width: 100%; }
 
     /* Week switcher */
     .week-bar {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
       background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 10px 12px; margin-bottom: 10px;
+      border-radius: var(--radius); padding: 9px 11px; margin-bottom: 10px;
     }
     .week-nav-btn {
-      width: 36px; height: 36px; border-radius: 10px;
+      width: 38px; height: 38px; border-radius: 10px;
       background: var(--card2); border: 1px solid var(--border);
-      font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+      font-size: 19px; font-weight: 700; display: flex; align-items: center; justify-content: center;
     }
     .week-info { text-align: center; flex: 1; }
-    .week-num { font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 7px; }
+    .week-num { font-weight: 800; font-size: 15.5px; display: flex; align-items: center; justify-content: center; gap: 7px; }
     .week-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
     /* Day tabs */
@@ -160,73 +155,65 @@
     }
     .day-tab-n { font-weight: 800; font-size: 13px; }
     .day-tab-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .day-tab-prog { font-size: 10.5px; margin-top: 3px; font-weight: 700; color: var(--accent); }
+    .day-tab-prog { font-size: 11px; margin-top: 3px; font-weight: 700; color: var(--accent); }
     .day-tab-prog.done { color: var(--ok); }
 
-    /* Factors bar */
+    /* Feeling / Elbow bar */
     .factors-card {
       background: var(--bg2); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 10px 12px; margin-bottom: 11px;
     }
     .factors-summary {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      font-size: 12.5px; cursor: pointer;
+      font-size: 13px; cursor: pointer;
     }
     .factors-body { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
-    .factor-row {
-      display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      margin-bottom: 8px; font-size: 13px;
-    }
-    .factor-row:last-child { margin-bottom: 0; }
-    .stepper {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 2px;
-    }
-    .stepper button {
-      width: 30px; height: 30px; border-radius: 8px; background: var(--card2);
-      font-weight: 800; font-size: 16px;
-    }
-    .stepper span { min-width: 32px; text-align: center; font-weight: 800; font-size: 13px; }
+    .factor-block { margin-bottom: 10px; }
+    .factor-block:last-child { margin-bottom: 0; }
+    .factor-lbl { font-size: 12.5px; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
 
     .seg {
       display: inline-flex; background: var(--card); border: 1px solid var(--border);
       border-radius: 10px; padding: 2px; gap: 2px;
     }
+    .seg-full { display: grid; width: 100%; }
     .seg button {
-      padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--muted);
+      padding: 7px 8px; border-radius: 8px; font-size: 12.5px; font-weight: 700; color: var(--muted);
     }
     .seg button.active { background: var(--accent-dark); color: #fff; }
+    .seg button.active-warn { background: #b45309; color: #fff; }
+    .seg button.active-danger { background: #be123c; color: #fff; }
 
     /* Exercise Cards */
     .ex-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
     }
-    .ex-card.ex-done { border-color: rgba(34, 197, 94, 0.45); }
+    .ex-card.ex-done { border-color: rgba(34, 197, 94, 0.5); }
     .ex-head {
       padding: 12px 13px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
     }
     .ex-num {
-      width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+      width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
       background: var(--card2); border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 12.5px; color: var(--accent); margin-top: 1px;
+      font-weight: 800; font-size: 13px; color: var(--accent); margin-top: 1px;
     }
     .ex-card.ex-done .ex-num { background: rgba(34, 197, 94, 0.2); border-color: var(--ok); color: var(--ok); }
     .ex-meta { flex: 1; min-width: 0; }
-    .ex-name { font-weight: 700; font-size: 14.5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .ex-sub { font-size: 12px; color: var(--muted); margin-top: 2px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .ex-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .ex-sub { font-size: 12px; color: var(--muted); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .ex-preview {
-      margin-top: 6px; font-size: 12.5px; color: #cbd5e1;
-      background: rgba(11, 17, 32, 0.5); border-radius: 8px; padding: 5px 8px;
+      margin-top: 7px; font-size: 13.5px; font-weight: 700; color: #e2e8f0;
+      background: rgba(11, 17, 32, 0.55); border-radius: 9px; padding: 6px 9px;
       font-variant-numeric: tabular-nums;
     }
     .ex-chev { color: var(--muted); font-size: 14px; padding: 4px; }
 
     .ex-body {
-      padding: 0 13px 13px;
+      padding: 0 12px 13px;
       border-top: 1px solid var(--border);
-      background: rgba(11, 17, 32, 0.28);
+      background: rgba(11, 17, 32, 0.25);
     }
 
     /* Hand tabs inside exercise */
@@ -235,7 +222,7 @@
       margin: 11px 0 9px;
     }
     .hand-btn {
-      padding: 8px 10px; border-radius: 10px; font-weight: 700; font-size: 13px;
+      padding: 9px 10px; border-radius: 10px; font-weight: 700; font-size: 13.5px;
       background: var(--card2); border: 1px solid var(--border); color: var(--muted);
       display: flex; align-items: center; justify-content: center; gap: 6px;
     }
@@ -243,63 +230,80 @@
       background: rgba(56, 189, 248, 0.18); border-color: var(--accent); color: #fff;
     }
 
-    .reason-box {
-      font-size: 12px; color: #cbd5e1;
+    /* Clean single-line mode strip */
+    .mode-strip {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 7px 10px; margin: 8px 0;
       background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.22);
-      border-radius: 10px; padding: 8px 10px; margin: 9px 0;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 10px; font-size: 12.5px;
     }
+    .mode-strip.heavy { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.28); }
+    .mode-strip.safe { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.28); }
+    .mode-base-btn {
+      font-size: 12px; font-weight: 700; color: var(--accent);
+      background: rgba(56, 189, 248, 0.12); padding: 3px 8px; border-radius: 7px;
+      white-space: nowrap;
+    }
+
     .warn-box {
-      font-size: 12px; color: #fecdd3;
+      font-size: 12.5px; color: #fecdd3;
       background: var(--danger-bg);
       border: 1px solid rgba(244, 63, 94, 0.35);
-      border-radius: 10px; padding: 8px 10px; margin: 9px 0;
+      border-radius: 10px; padding: 8px 10px; margin: 8px 0;
+    }
+    .tip-box {
+      font-size: 12.5px; color: #bae6fd;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 10px; padding: 7px 10px; margin: 8px 0;
     }
     .calib-box {
       background: rgba(245, 158, 11, 0.1);
       border: 1px solid rgba(245, 158, 11, 0.35);
-      border-radius: 10px; padding: 10px; margin: 9px 0;
+      border-radius: 11px; padding: 10px; margin: 9px 0;
     }
     .calib-row { display: flex; gap: 7px; margin-top: 8px; align-items: center; }
 
-    /* Set rows */
+    /* Set rows - big, crisp, scannable in gym */
     .set-head {
-      display: grid; grid-template-columns: 24px 1fr 118px 66px 38px;
+      display: grid; grid-template-columns: 20px minmax(76px, 1fr) 114px 56px 40px;
       gap: 6px; font-size: 11px; color: var(--muted);
       padding: 4px 2px; text-align: center;
     }
     .set-head div:nth-child(2) { text-align: left; }
     .set-row {
-      display: grid; grid-template-columns: 24px 1fr 118px 66px 38px;
+      display: grid; grid-template-columns: 20px minmax(76px, 1fr) 114px 56px 40px;
       gap: 6px; align-items: center;
-      padding: 6px 2px; border-bottom: 1px solid rgba(38, 54, 89, 0.55);
+      padding: 7px 2px; border-bottom: 1px solid rgba(38, 54, 89, 0.5);
     }
     .set-row:last-of-type { border-bottom: none; }
-    .set-row.done { background: rgba(34, 197, 94, 0.08); border-radius: 9px; padding-left: 4px; padding-right: 4px; }
-    .set-idx { font-weight: 800; font-size: 12.5px; color: var(--muted); text-align: center; }
-    .set-target { font-size: 12px; color: #cbd5e1; line-height: 1.25; }
-    .set-target small { display: block; color: var(--muted); font-size: 10.5px; }
+    .set-row.done { background: rgba(34, 197, 94, 0.1); border-radius: 10px; padding-left: 4px; padding-right: 4px; }
+    .set-idx { font-weight: 800; font-size: 13px; color: var(--muted); text-align: center; }
+    .set-target { line-height: 1.2; min-width: 0; }
+    .set-target strong { display: block; font-size: 14px; font-weight: 800; color: #f8fafc; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .set-target small { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; white-space: nowrap; }
 
     .w-ctrl {
       display: flex; align-items: center; gap: 2px;
-      background: var(--bg); border: 1px solid var(--border); border-radius: 9px; padding: 2px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 2px;
     }
     .w-ctrl button {
-      width: 28px; height: 32px; border-radius: 7px; background: var(--card2);
-      font-weight: 800; font-size: 16px; flex-shrink: 0;
+      width: 30px; height: 34px; border-radius: 8px; background: var(--card2);
+      font-weight: 800; font-size: 17px; flex-shrink: 0;
     }
     .w-ctrl input {
       width: 100%; min-width: 0; background: transparent; border: none; color: var(--text);
-      text-align: center; font-weight: 800; font-size: 13.5px; padding: 2px 0;
+      text-align: center; font-weight: 800; font-size: 14px; padding: 2px 0;
       font-variant-numeric: tabular-nums;
     }
     .inp {
       width: 100%; background: var(--bg); border: 1px solid var(--border);
-      border-radius: 9px; color: var(--text); padding: 7px 8px;
-      font-size: 13.5px; font-weight: 700; text-align: center;
+      border-radius: 10px; color: var(--text); padding: 8px 6px;
+      font-size: 14px; font-weight: 700; text-align: center;
       font-variant-numeric: tabular-nums;
     }
-    .inp-text { text-align: left; font-weight: 500; }
+    .inp-text { text-align: left; font-weight: 500; padding: 9px 10px; }
     .inp:focus, .w-ctrl input:focus, select:focus, textarea:focus {
       outline: none; border-color: var(--accent);
     }
@@ -310,19 +314,19 @@
     }
 
     .check-btn {
-      width: 36px; height: 36px; border-radius: 10px;
+      width: 40px; height: 40px; border-radius: 11px;
       background: var(--card2); border: 1px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 900; color: var(--muted);
+      font-size: 18px; font-weight: 900; color: var(--muted);
     }
     .check-btn.done { background: var(--ok); border-color: var(--ok); color: #052e16; }
 
     .effort-row {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
-      margin: 11px 0 9px;
+      margin: 7px 0 9px;
     }
     .eff-btn {
-      padding: 8px 4px; border-radius: 10px; font-size: 12px; font-weight: 700;
+      padding: 9px 4px; border-radius: 10px; font-size: 12.5px; font-weight: 700;
       background: var(--card2); border: 1px solid var(--border); color: var(--muted);
       text-align: center;
     }
@@ -379,7 +383,7 @@
     }
     .hist-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
     .hist-sets {
-      margin-top: 6px; font-size: 12.5px; color: #cbd5e1;
+      margin-top: 6px; font-size: 13px; font-weight: 600; color: #e2e8f0;
       font-variant-numeric: tabular-nums;
     }
 
@@ -393,9 +397,9 @@
       box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
       display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
-    .timer-time { font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--accent); min-width: 66px; }
+    .timer-time { font-size: 24px; font-weight: 900; font-variant-numeric: tabular-nums; color: var(--accent); min-width: 72px; }
     .timer-time.done { color: var(--ok); }
-    .timer-lbl { font-size: 11.5px; color: var(--muted); }
+    .timer-lbl { font-size: 12px; color: var(--muted); }
     .timer-prog {
       position: absolute; left: 10px; right: 10px; bottom: 0; height: 3px;
       background: rgba(56,189,248,0.18); border-radius: 3px; overflow: hidden;
@@ -426,8 +430,8 @@
     .toast {
       position: fixed; top: 64px; left: 50%; transform: translateX(-50%);
       z-index: 99; background: rgba(15, 23, 42, 0.96); border: 1px solid var(--accent);
-      color: #fff; padding: 7px 14px; border-radius: 999px;
-      font-size: 12.5px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      color: #fff; padding: 8px 15px; border-radius: 999px;
+      font-size: 13px; font-weight: 700; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
       opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
       max-width: 88vw; text-align: center;
     }
@@ -454,19 +458,26 @@
     const STORAGE_KEY = 'armplan_zheka_state_v1';
     const IDB_NAME = 'ArmPlanZhekaDB';
     const IDB_STORE = 'kv';
+    const APP_STATE_VERSION = 2;
 
     const PERIODS = {
-      prep:  { name: 'Подготовительный', mult: 0.90, desc: 'ОФП, связки, лёгкая динамика' },
-      main:  { name: 'Основной',         mult: 1.00, desc: 'Специфическая сила и техника' },
-      comp:  { name: 'Соревновательный', mult: 1.03, desc: 'Пик силы и спарринги к марту' },
-      trans: { name: 'Переходный',       mult: 0.80, desc: 'Восстановление и реабилитация' }
+      prep:  { name: 'Подготовка',    mult: 0.90 },
+      main:  { name: 'Основной',      mult: 1.00 },
+      comp:  { name: 'Перед стартом', mult: 1.03 },
+      trans: { name: 'Отдых',         mult: 0.80 }
     };
 
     const DAY_INFO = {
-      1: { title: 'День 1', short: 'Жим · Крюк', full: 'Жим, бицепс и крюк' },
-      2: { title: 'День 2', short: 'Натяжка · Угол', full: 'Подтягивания, натяжка и угол' },
+      1: { title: 'День 1', short: 'Жим · Крюк',     full: 'Жим, бицепс и крюк' },
+      2: { title: 'День 2', short: 'Натяжка · Угол', full: 'Турник, натяжка и угол' },
       3: { title: 'День 3', short: 'Кисть · Пальцы', full: 'Кисть и пальцы' },
-      4: { title: 'День 4', short: 'Спина · Прон.', full: 'Спина и пронация' }
+      4: { title: 'День 4', short: 'Спина · Прон.',  full: 'Спина и пронация' }
+    };
+
+    const DELOAD_MODES = {
+      working: 'Рабочая (10-10-8-8)',
+      light:   'Бережная (50–60%)',
+      every4:  '3 тяжёлые + 1 лёгкая'
     };
 
     const DEFAULT_EQUIPMENT = {
@@ -475,23 +486,23 @@
         name: 'Гантели',
         mode: 'list',
         weights: [10, 12.5, 15, 16, 20, 22.5],
-        note: 'Доступные гантели в зале (можно дополнять)'
+        note: 'Гантели в зале'
       },
       barbell20: {
         id: 'barbell20',
-        name: 'Штанга (гриф 20 кг)',
+        name: 'Штанга (20 кг)',
         mode: 'step',
         min: 20,
         step: 1.25,
-        note: 'Гриф 20 кг, минимальный подъём 1.25 кг'
+        note: 'Гриф 20 кг, шаг 1.25 кг'
       },
       barbell8: {
         id: 'barbell8',
-        name: 'Кривой / бицепс гриф (8 кг)',
+        name: 'Кривой гриф (8 кг)',
         mode: 'step',
         min: 8,
         step: 1.25,
-        note: 'Гриф 8 кг, минимальный подъём 1.25 кг'
+        note: 'Гриф 8 кг, шаг 1.25 кг'
       },
       plates: {
         id: 'plates',
@@ -499,7 +510,7 @@
         mode: 'step',
         min: 1.25,
         step: 1.25,
-        note: 'Простые блины от 1.25 кг, шаг 1.25 кг'
+        note: 'Шаг 1.25 кг'
       },
       bodyweight_plates: {
         id: 'bodyweight_plates',
@@ -507,7 +518,7 @@
         mode: 'step',
         min: 0,
         step: 1.25,
-        note: '0 кг = свой вес, шаг доп. веса 1.25 кг'
+        note: '0 = свой вес, шаг 1.25 кг'
       },
       cable_main: {
         id: 'cable_main',
@@ -515,67 +526,73 @@
         mode: 'step',
         min: 3,
         step: 3,
-        note: 'Примерно 3 кг — можно исправить, история сохранится'
+        note: 'Шаг ~3 кг (можно поправить)'
       },
       cable_row: {
         id: 'cable_row',
-        name: 'Блок на спину (гребля)',
+        name: 'Блок на спину',
         mode: 'step',
         min: 5,
         step: 5,
-        note: 'Шаг плиток 5 кг'
+        note: 'Шаг 5 кг'
       },
       table: {
         id: 'table',
         name: 'Стол / резина',
         mode: 'table',
-        note: 'Спарринг-партнёр или резина'
+        note: 'Спарринг или резина'
       }
     };
 
+    // deloadMode:
+    //   'working' -> 4 sets 10-10-8-8 (65-78%, working weights without peak)
+    //   'light'   -> 5 sets 10-10-10-8-8 (50-60%, protects elbow — side pressure/hook)
+    //   'every4'  -> 3 heavy weeks in a row + 1 working deload on every 4th week (bench press)
     const DEFAULT_EXERCISES = [
       // День 1
-      { id: 'd1_bench', day: 1, order: 1, name: 'Жим лёжа', equipId: 'barbell20', hands: 'both', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd1_ez_curl', day: 1, order: 2, name: 'Бицепс (кривой гриф)', equipId: 'barbell8', hands: 'both', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd1_hook_mid', day: 1, order: 3, name: 'Работа в крюк (средний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd1_db_curl', day: 1, order: 4, name: 'Бицепс (гантелей)', equipId: 'dumbbells', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd1_hook_high', day: 1, order: 5, name: 'Работа в крюк (верхний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd1_hook_cone', day: 1, order: 6, name: 'Работа в крюк (средний этаж, конусной ручкой)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd1_table', day: 1, order: 7, name: 'Отработка за столом (спарринг партнёр / резина)', equipId: 'table', hands: 'uni', type: 'table', elbowRisk: true, baseline1RM: {} },
+      { id: 'd1_bench',     day: 1, order: 1, name: 'Жим лёжа',                                      equipId: 'barbell20',         hands: 'both', type: 'weight',     elbowRisk: false, deloadMode: 'every4',  baseline1RM: {} },
+      { id: 'd1_ez_curl',   day: 1, order: 2, name: 'Бицепс (кривой гриф)',                          equipId: 'barbell8',          hands: 'both', type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd1_hook_mid',  day: 1, order: 3, name: 'Работа в крюк (средний этаж)',                  equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: true,  deloadMode: 'light',   baseline1RM: {} },
+      { id: 'd1_db_curl',   day: 1, order: 4, name: 'Бицепс (гантелей)',                             equipId: 'dumbbells',         hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd1_hook_high', day: 1, order: 5, name: 'Работа в крюк (верхний этаж)',                  equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: true,  deloadMode: 'light',   baseline1RM: {} },
+      { id: 'd1_hook_cone', day: 1, order: 6, name: 'Работа в крюк (конусная ручка)',                equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: true,  deloadMode: 'light',   baseline1RM: {} },
+      { id: 'd1_table',     day: 1, order: 7, name: 'Отработка за столом',                           equipId: 'table',             hands: 'uni',  type: 'table',      elbowRisk: true,  deloadMode: 'light',   baseline1RM: {} },
 
       // День 2
-      { id: 'd2_pullups', day: 2, order: 1, name: 'Подтягивания на перекладине', equipId: 'bodyweight_plates', hands: 'both', type: 'bodyweight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd2_back_pin', day: 2, order: 2, name: 'Натяжка (столбик)', equipId: 'plates', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd2_angle_pin', day: 2, order: 3, name: 'Угол (столбик)', equipId: 'plates', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd2_back_low', day: 2, order: 4, name: 'Натяжка на блоке (нижний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd2_angle_db', day: 2, order: 5, name: 'Угол (гантелей)', equipId: 'dumbbells', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd2_ez_rev', day: 2, order: 6, name: 'Кривой гриф (обратный хват)', equipId: 'barbell8', hands: 'both', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd2_angle_mid', day: 2, order: 7, name: 'Угол на блоке (средний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd2_table', day: 2, order: 8, name: 'Работа за столом', equipId: 'table', hands: 'uni', type: 'table', elbowRisk: true, baseline1RM: {} },
+      { id: 'd2_pullups',   day: 2, order: 1, name: 'Подтягивания на перекладине',                   equipId: 'bodyweight_plates', hands: 'both', type: 'bodyweight', elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd2_back_pin',  day: 2, order: 2, name: 'Натяжка (столбик)',                             equipId: 'plates',            hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd2_angle_pin', day: 2, order: 3, name: 'Угол (столбик)',                                equipId: 'plates',            hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd2_back_low',  day: 2, order: 4, name: 'Натяжка на блоке (нижний этаж)',                equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd2_angle_db',  day: 2, order: 5, name: 'Угол (гантелей)',                               equipId: 'dumbbells',         hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd2_ez_rev',    day: 2, order: 6, name: 'Кривой гриф (обратный хват)',                   equipId: 'barbell8',          hands: 'both', type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd2_angle_mid', day: 2, order: 7, name: 'Угол на блоке (средний этаж)',                  equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd2_table',     day: 2, order: 8, name: 'Работа за столом',                              equipId: 'table',             hands: 'uni',  type: 'table',      elbowRisk: true,  deloadMode: 'light',   baseline1RM: {} },
 
       // День 3
-      { id: 'd3_fingers_bar', day: 3, order: 1, name: 'Пальцы (прямой гриф)', equipId: 'barbell20', hands: 'both', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd3_wrist_mid', day: 3, order: 2, name: 'Кисть (средний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd3_fingers_mid', day: 3, order: 3, name: 'Пальцы (средний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd3_wrist_high', day: 3, order: 4, name: 'Кисть (верхний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd3_fingers_high', day: 3, order: 5, name: 'Пальцы (верхний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd3_wrist_db', day: 3, order: 6, name: 'Кисть (гантелей)', equipId: 'dumbbells', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd3_wrist_bar', day: 3, order: 7, name: 'Кисть (прямой гриф)', equipId: 'barbell20', hands: 'both', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd3_fingers_hold', day: 3, order: 8, name: 'Пальцы (удержание блинов)', equipId: 'plates', hands: 'uni', type: 'static', elbowRisk: false, baseline1RM: {} },
+      { id: 'd3_fingers_bar',  day: 3, order: 1, name: 'Пальцы (прямой гриф)',                       equipId: 'barbell20',         hands: 'both', type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd3_wrist_mid',    day: 3, order: 2, name: 'Кисть (средний этаж)',                       equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: true,  deloadMode: 'working', baseline1RM: {} },
+      { id: 'd3_fingers_mid',  day: 3, order: 3, name: 'Пальцы (средний этаж)',                      equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd3_wrist_high',   day: 3, order: 4, name: 'Кисть (верхний этаж)',                       equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: true,  deloadMode: 'working', baseline1RM: {} },
+      { id: 'd3_fingers_high', day: 3, order: 5, name: 'Пальцы (верхний этаж)',                      equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd3_wrist_db',     day: 3, order: 6, name: 'Кисть (гантелей)',                           equipId: 'dumbbells',         hands: 'uni',  type: 'weight',     elbowRisk: true,  deloadMode: 'working', baseline1RM: {} },
+      { id: 'd3_wrist_bar',    day: 3, order: 7, name: 'Кисть (прямой гриф)',                        equipId: 'barbell20',         hands: 'both', type: 'weight',     elbowRisk: true,  deloadMode: 'working', baseline1RM: {} },
+      { id: 'd3_fingers_hold', day: 3, order: 8, name: 'Пальцы (удержание блинов)',                  equipId: 'plates',            hands: 'uni',  type: 'static',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
 
       // День 4
-      { id: 'd4_pullups', day: 4, order: 1, name: 'Подтягивание на перекладине', equipId: 'bodyweight_plates', hands: 'both', type: 'bodyweight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd4_pron_classic', day: 4, order: 2, name: 'Пронатор (столбик, классический хват)', equipId: 'plates', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd4_db_row', day: 4, order: 3, name: 'Тяга гантели с пола', equipId: 'dumbbells', hands: 'uni', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd4_pron_thumb', day: 4, order: 4, name: 'Пронатор (столбик, через палец)', equipId: 'plates', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd4_horiz_row', day: 4, order: 5, name: 'Горизонтальная тяга', equipId: 'cable_row', hands: 'both', type: 'weight', elbowRisk: false, baseline1RM: {} },
-      { id: 'd4_pron_low', day: 4, order: 6, name: 'Пронатор на блоке (нижний этаж)', equipId: 'cable_main', hands: 'uni', type: 'weight', elbowRisk: true, baseline1RM: {} },
-      { id: 'd4_table', day: 4, order: 7, name: 'Отработка за столом (спарринг партнёр / резина)', equipId: 'table', hands: 'uni', type: 'table', elbowRisk: true, baseline1RM: {} }
+      { id: 'd4_pullups',      day: 4, order: 1, name: 'Подтягивания на перекладине',                equipId: 'bodyweight_plates', hands: 'both', type: 'bodyweight', elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd4_pron_classic', day: 4, order: 2, name: 'Пронатор (столбик, классический)',           equipId: 'plates',            hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd4_db_row',       day: 4, order: 3, name: 'Тяга гантели с пола',                        equipId: 'dumbbells',         hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd4_pron_thumb',   day: 4, order: 4, name: 'Пронатор (столбик, через палец)',            equipId: 'plates',            hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd4_horiz_row',    day: 4, order: 5, name: 'Горизонтальная тяга',                        equipId: 'cable_row',         hands: 'both', type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd4_pron_low',     day: 4, order: 6, name: 'Пронатор на блоке (нижний этаж)',            equipId: 'cable_main',        hands: 'uni',  type: 'weight',     elbowRisk: false, deloadMode: 'working', baseline1RM: {} },
+      { id: 'd4_table',        day: 4, order: 7, name: 'Отработка за столом',                        equipId: 'table',             hands: 'uni',  type: 'table',      elbowRisk: true,  deloadMode: 'light',   baseline1RM: {} }
     ];
+
+    const DEFAULT_EX_MAP = Object.fromEntries(DEFAULT_EXERCISES.map(e => [e.id, e]));
 
     function defaultState() {
       return {
-        version: 1,
+        version: APP_STATE_VERSION,
         updatedAt: Date.now(),
         settings: {
           bodyweight: 75,
@@ -584,7 +601,7 @@
           startWeekType: 'light',
           currentWeek: 1,
           compDate: '2027-03-15',
-          elbowPain: { R: 2, L: 0 },
+          elbowPain: { R: 0, L: 0 },
           energy: 'normal',
           autoTimer: true
         },
@@ -597,7 +614,7 @@
 
     // ==================== PERSISTENCE (localStorage + IndexedDB) ====================
     function idbOpen() {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         if (!('indexedDB' in window)) return resolve(null);
         const req = indexedDB.open(IDB_NAME, 1);
         req.onupgradeneeded = () => {
@@ -638,8 +655,9 @@
     function mergeWithDefaults(raw) {
       const def = defaultState();
       if (!raw || typeof raw !== 'object') return def;
+      const oldVer = Number(raw.version) || 1;
       const merged = {
-        version: 1,
+        version: APP_STATE_VERSION,
         updatedAt: raw.updatedAt || Date.now(),
         settings: Object.assign({}, def.settings, raw.settings || {}),
         equipment: Object.assign({}, def.equipment, raw.equipment || {}),
@@ -650,6 +668,31 @@
       if (!merged.settings.elbowPain || typeof merged.settings.elbowPain !== 'object') {
         merged.settings.elbowPain = { R: 0, L: 0 };
       }
+
+      // Smooth migration v1 -> v2 (preserves all baseline1RM, history, custom equipment & exercises!)
+      const pronIds = new Set(['d4_pron_classic', 'd4_pron_thumb', 'd4_pron_low']);
+      merged.exercises = merged.exercises.map(ex => {
+        const ref = DEFAULT_EX_MAP[ex.id];
+        const copy = Object.assign({}, ex);
+        if (!copy.deloadMode) {
+          copy.deloadMode = ref ? ref.deloadMode : 'working';
+        }
+        if (oldVer < 2 && pronIds.has(copy.id)) {
+          copy.elbowRisk = false;
+        }
+        return copy;
+      });
+
+      // On v1 -> v2 upgrade, clear untouched drafts so updated deload weights appear immediately
+      if (oldVer < 2) {
+        for (const k of Object.keys(merged.drafts)) {
+          const d = merged.drafts[k];
+          if (!d || !d.sets || !d.sets.some(s => s.done)) {
+            delete merged.drafts[k];
+          }
+        }
+      }
+
       return merged;
     }
 
@@ -657,9 +700,7 @@
 
     function saveState() {
       state.updatedAt = Date.now();
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
       idbSet(STORAGE_KEY, state);
     }
 
@@ -681,9 +722,7 @@
     }
 
     // ==================== MATH & EQUIPMENT SNAPPING ====================
-    function round2(n) {
-      return Math.round(n * 100) / 100;
-    }
+    function round2(n) { return Math.round(n * 100) / 100; }
     function fmtKg(n) {
       if (n === null || n === undefined || isNaN(n)) return '—';
       const r = round2(Number(n));
@@ -721,7 +760,6 @@
         }
         return { weight: best, clampedMin: false, atMax: false };
       }
-      // step mode
       const min = Number(equip.min) || 0;
       const step = Math.max(0.25, Number(equip.step) || 1.25);
       if (targetKg <= min) {
@@ -767,15 +805,19 @@
       return round2(w * (1 + r / 30));
     }
 
-    function weightForReps(oneRM, reps) {
-      if (reps <= 1) return oneRM;
-      return oneRM / (1 + reps / 30);
-    }
-
     function getWeekType(weekNum, startType) {
       const isOdd = ((weekNum - 1) % 2) === 0;
       if (startType === 'light') return isOdd ? 'light' : 'heavy';
       return isOdd ? 'heavy' : 'light';
+    }
+
+    function getEffectiveWeekType(ex, weekNum) {
+      const mode = ex.deloadMode || 'working';
+      if (mode === 'every4') {
+        // 3 heavy weeks in a row, 4th week is deload
+        return ((weekNum - 1) % 4) === 3 ? 'light' : 'heavy';
+      }
+      return getWeekType(weekNum, state.settings.startWeekType);
     }
 
     function getElbowPainFor(ex, hand, painObj) {
@@ -787,10 +829,18 @@
     }
 
     function getElbowFactor(pain) {
-      if (pain >= 7) return { mult: 0.50, level: 'stop', msg: `Локоть ${pain}/10 — стоп-сигнал! Лучше пропустить или только мягкая изометрия без боли.` };
-      if (pain >= 4) return { mult: 0.75, level: 'warn', msg: `Локоть ${pain}/10 — щадящий режим (−25%). Работаем строго без боли (правило ≤3/10).` };
-      if (pain === 3) return { mult: 0.90, level: 'caution', msg: `Локоть 3/10 — аккуратно (−10%), плавный темп без рывков.` };
+      if (pain >= 7) return { mult: 0.50, level: 'stop', msg: 'Локоть сильно болит — лучше пропустить или только лёгкая резина.' };
+      if (pain >= 4) return { mult: 0.75, level: 'warn', msg: 'Локоть болит — скинул вес на 25%. Работай строго без боли.' };
+      if (pain === 3) return { mult: 0.90, level: 'caution', msg: 'Локоть ноет — скинул 10%, без рывков.' };
       return { mult: 1.00, level: 'ok', msg: '' };
+    }
+
+    function painWord(p) {
+      const v = Number(p) || 0;
+      if (v >= 7) return 'сильно';
+      if (v >= 4) return 'болит';
+      if (v === 3) return 'ноет';
+      return 'норм';
     }
 
     function getHistoryFor(exerciseId, hand) {
@@ -799,10 +849,20 @@
         .sort((a, b) => (b.ts || 0) - (a.ts || 0));
     }
 
+    function clearUntouchedDraftsFor(exId) {
+      for (const k of Object.keys(state.drafts)) {
+        if (!exId || k.includes(`_${exId}_`)) {
+          const d = state.drafts[k];
+          if (!d || !d.sets || !d.sets.some(s => s.done)) delete state.drafts[k];
+        }
+      }
+    }
+
     // ==================== CORE AUTO-PLAN ENGINE ====================
     function computePlan(ex, hand, targetWeek, opts) {
       const options = opts || {};
-      const weekType = getWeekType(targetWeek, state.settings.startWeekType);
+      const deloadMode = ex.deloadMode || 'working';
+      const weekType = getEffectiveWeekType(ex, targetWeek);
       const equip = getEquip(ex.equipId);
       const period = PERIODS[state.settings.period] || PERIODS.main;
       const painObj = options.ignorePain ? { R: 0, L: 0 } : state.settings.elbowPain;
@@ -810,11 +870,11 @@
       const elbow = getElbowFactor(pain);
       const energyMult = (!options.isForecast && state.settings.energy === 'low') ? 0.92 : 1.0;
 
-      // Count how many heavy weeks strictly between currentWeek and targetWeek for forecasting
+      // Count heavy weeks ahead for THIS exercise
       let heavyAhead = 0;
       if (targetWeek > state.settings.currentWeek) {
         for (let w = state.settings.currentWeek + 1; w <= targetWeek; w++) {
-          if (getWeekType(w, state.settings.startWeekType) === 'heavy') heavyAhead++;
+          if (getEffectiveWeekType(ex, w) === 'heavy') heavyAhead++;
         }
       }
 
@@ -823,19 +883,20 @@
         const isSafe = pain >= 3;
         let recIntensity = weekType === 'heavy' ? 80 : 55;
         let recText = weekType === 'heavy'
-          ? 'Плотная борьба / спарринг 75–90%, 20–30 мин, контроль техники'
-          : 'Техника и резина 50–60%, 15–20 мин, без закисления';
+          ? 'Спарринг 75–90%, 20–30 мин'
+          : 'Техника и резина 50–60%, 15–20 мин';
         if (isSafe) {
           recIntensity = pain >= 7 ? 0 : 50;
           recText = pain >= 7
-            ? 'Пропустить борьбу за столом до снижения боли в локте!'
-            : 'Только техника / резина ≤50% без боли (режим реабилитации локтя)';
+            ? 'Пропустить стол, пока болит локоть'
+            : 'Только техника / резина до 50% без боли';
         }
         return {
-          type: 'table', weekType, elbow, pain,
+          type: 'table', weekType, deloadMode, elbow, pain,
           intensity: recIntensity,
           duration: weekType === 'heavy' ? 25 : 15,
           mode: (weekType === 'light' || isSafe) ? 'Резина / техника' : 'Спарринг',
+          modeLabel: weekType === 'heavy' ? '🔥 Спарринг' : '🌿 Техника / резина',
           reason: recText
         };
       }
@@ -845,31 +906,31 @@
         const recs = getHistoryFor(ex.id, hand);
         const last = recs[0];
         let baseWeight = (ex.baseline1RM && ex.baseline1RM[hand]) ? Number(ex.baseline1RM[hand]) : null;
-        let reasonParts = [];
+        let progTag = '';
         if (last && last.sets && last.sets.length) {
           const bestW = Math.max(...last.sets.map(s => Number(s.weight) || 0));
           if (bestW > 0) {
-            baseWeight = last.weekType === 'light' ? bestW / 0.72 : bestW;
-            if (last.weekType === 'heavy') {
+            const wasSoft = last.weekType === 'light' && (last.deloadMode === 'light' || !last.deloadMode);
+            baseWeight = wasSoft ? bestW / 0.72 : (last.weekType === 'light' ? bestW / 0.85 : bestW);
+            if (last.weekType === 'heavy' && targetWeek > last.week) {
               if (last.effort === 'easy' || last.effort === 'ok') {
                 baseWeight = stepWeightBy(baseWeight, +1, equip);
-                reasonParts.push('после прошлой силовой +1 шаг');
+                progTag = '+шаг';
               } else if (last.effort === 'fail') {
                 baseWeight = stepWeightBy(baseWeight, -1, equip);
-                reasonParts.push('после отказа −1 шаг');
-              } else {
-                reasonParts.push('закрепление прошлого веса');
+                progTag = '−шаг';
               }
             }
           }
         }
         if (baseWeight === null) {
-          return { type: 'static', weekType, elbow, pain, needsCalibration: true, sets: [], reason: 'Задай рабочий вес блинов — дальше приложение само распишет тяжёлые и лёгкие недели.' };
+          return { type: 'static', weekType, deloadMode, elbow, pain, needsCalibration: true, sets: [], modeLabel: 'Удержание' };
         }
-        let targetW = baseWeight * (weekType === 'heavy' ? 1.0 : 0.70) * period.mult * elbow.mult * energyMult;
+        const lightMult = deloadMode === 'light' ? 0.70 : 0.85;
+        let targetW = baseWeight * (weekType === 'heavy' ? 1.0 : lightMult) * period.mult * elbow.mult * energyMult;
         if (heavyAhead > 0) targetW *= Math.pow(1.03, heavyAhead);
         const snapped = snapWeight(targetW, equip);
-        const secTarget = weekType === 'heavy' ? 15 : 30;
+        const secTarget = weekType === 'heavy' ? 15 : (deloadMode === 'light' ? 30 : 20);
         const sets = [1, 2, 3, 4].map((n, idx) => ({
           setNum: n,
           weight: idx === 0 && weekType === 'heavy' ? snapWeight(snapped.weight * 0.75, equip).weight : snapped.weight,
@@ -878,9 +939,10 @@
           restSec: weekType === 'heavy' ? 150 : 90
         }));
         return {
-          type: 'static', weekType, elbow, pain, needsCalibration: false,
-          sets,
-          reason: `${weekType === 'heavy' ? 'Силовое удержание (15–20 с)' : 'Разгрузка (30 с, ~70%)'}${reasonParts.length ? ' · ' + reasonParts.join(', ') : ''}`
+          type: 'static', weekType, deloadMode, elbow, pain, needsCalibration: false,
+          base1RM: round2(baseWeight),
+          sets, progTag,
+          modeLabel: weekType === 'heavy' ? '🔥 Тяжёлая · 15–20 с' : (deloadMode === 'light' ? '🌿 Бережная · 30 с' : '🌿 Рабочая · 20 с')
         };
       }
 
@@ -892,116 +954,120 @@
       const lastAny = recs[0];
 
       let base1RM = null;
-      let sourceNote = '';
-      let repBoost = 0; // Double progression bonus reps when next jump > 12%
+      let progTag = '';
+      let repBoost = 0;
       let doubleProgNote = '';
 
       if (lastHeavy && lastHeavy.e1rm > 0) {
-        // Restore true (healthy-elbow) 1RM if the saved session was done in elbow-rehab mode,
-        // so we never apply the elbow discount twice!
         const savedElbowMult = lastHeavy.elbowMult || getElbowFactor(lastHeavy.elbowPain || 0).mult;
         const normalized1RM = savedElbowMult < 1 ? round2(Number(lastHeavy.e1rm) / savedElbowMult) : Number(lastHeavy.e1rm);
-        // Never drop true baseline drastically just because a session was partial/rehab
         const prevHealthy = recs.find(r => r.weekType === 'heavy' && (!r.elbowPain || r.elbowPain < 3) && r.e1rm > 0);
         const baselineVal = (ex.baseline1RM && ex.baseline1RM[hand] > 0) ? Number(ex.baseline1RM[hand]) : 0;
         base1RM = (lastHeavy.elbowPain >= 3)
           ? Math.max(normalized1RM, prevHealthy ? Number(prevHealthy.e1rm) : 0, baselineVal)
           : normalized1RM;
-        // Compute progression based on last heavy session (only when planning a later week than lastHeavy)
+
         const isLaterWeek = targetWeek > lastHeavy.week;
         const lastPeakSet = lastHeavy.sets && lastHeavy.sets.length ? lastHeavy.sets[lastHeavy.sets.length - 1] : null;
         const lastPeakW = lastPeakSet ? Number(lastPeakSet.weight) || 0 : 0;
         const nextW = stepWeightBy(lastPeakW, +1, equip);
         const jumpRatio = lastPeakW > 0 ? (nextW - lastPeakW) / lastPeakW : 0;
 
-        if (!isLaterWeek) {
-          sourceNote = `по записи Недели ${lastHeavy.week}`;
-        } else if (lastHeavy.effort === 'easy') {
-          if (isBW) {
-            base1RM += Math.max(1.25, equip.step || 1.25);
-          } else if (nextW > lastPeakW) {
-            base1RM *= Math.max(1.03, Math.min(1.10, nextW / Math.max(1, lastPeakW)));
-          } else {
-            repBoost = 2;
-            doubleProgNote = 'Достигнут макс. вес в списке снарядов — добавляем +2 повтора (или добавь новый вес в «Зал»).';
-          }
-          sourceNote = 'прошлая силовая «Легко» → шаг вверх';
-        } else if (lastHeavy.effort === 'ok') {
-          if (!isBW && jumpRatio > 0.12 && (!lastHeavy.elbowPain || lastHeavy.elbowPain < 3)) {
-            // Big jump (e.g. dumbbell 16 -> 20 kg = +25%): double progression!
-            const targetPeakReps = state.settings.heavyScheme === '8-6-6-4-2' ? 2 : 3;
-            const donePeakReps = lastPeakSet ? Number(lastPeakSet.reps) || 0 : 0;
-            if (donePeakReps >= targetPeakReps + 2) {
-              base1RM = epley1RM(nextW, targetPeakReps);
-              sourceNote = `закрыто с запасом повторов → переход на ${fmtKg(nextW)} кг`;
+        if (isLaterWeek) {
+          if (lastHeavy.effort === 'easy') {
+            if (isBW) {
+              base1RM += Math.max(1.25, equip.step || 1.25);
+            } else if (nextW > lastPeakW) {
+              base1RM *= Math.max(1.03, Math.min(1.10, nextW / Math.max(1, lastPeakW)));
             } else {
               repBoost = 2;
-              doubleProgNote = `Следующий снаряд ${fmtKg(nextW)} кг (+${Math.round(jumpRatio * 100)}%) — сначала добираем +2 повтора на текущем весе, затем прыжок.`;
-              sourceNote = 'двойная прогрессия (большой шаг снаряда)';
+              doubleProgNote = 'Макс. гантель в списке — делаем +2 повтора (или добавь новый вес в «Зал»).';
             }
-          } else {
-            base1RM *= 1.025;
-            sourceNote = 'прошлая силовая «Норма» → плавный шаг вверх';
+            progTag = '+шаг';
+          } else if (lastHeavy.effort === 'ok') {
+            if (!isBW && jumpRatio > 0.12 && (!lastHeavy.elbowPain || lastHeavy.elbowPain < 3)) {
+              const targetPeakReps = state.settings.heavyScheme === '8-6-6-4-2' ? 2 : 3;
+              const donePeakReps = lastPeakSet ? Number(lastPeakSet.reps) || 0 : 0;
+              if (donePeakReps >= targetPeakReps + 2) {
+                base1RM = epley1RM(nextW, targetPeakReps);
+                progTag = `→ ${fmtKg(nextW)} кг`;
+              } else {
+                repBoost = 2;
+                doubleProgNote = `До следующей гантели (${fmtKg(nextW)} кг) большой шаг — сначала +2 повтора, потом переход.`;
+                progTag = '+2 повт';
+              }
+            } else {
+              base1RM *= 1.025;
+              progTag = '+шаг';
+            }
+          } else if (lastHeavy.effort === 'hard') {
+            progTag = 'закрепляем';
+          } else if (lastHeavy.effort === 'fail') {
+            base1RM *= 0.94;
+            progTag = '−6%';
           }
-        } else if (lastHeavy.effort === 'hard') {
-          sourceNote = 'прошлая силовая «Тяжело» → закрепляем вес';
-        } else if (lastHeavy.effort === 'fail') {
-          base1RM *= 0.94;
-          sourceNote = 'прошлая силовая «Отказ» → откат −6%';
         }
       } else if (lastAny && lastAny.e1rm > 0) {
-        // Only light history exists: estimate real 1RM carefully (light is ~55-60%)
         const maxW = Math.max(...(lastAny.sets || []).map(s => Number(s.weight) || 0));
         if (isBW) {
           base1RM = Math.max(lastAny.e1rm, bw + maxW);
+        } else if (lastAny.deloadMode === 'working') {
+          base1RM = Math.max(lastAny.e1rm, maxW / 0.78);
         } else {
           base1RM = Math.max(lastAny.e1rm, maxW / 0.58);
         }
-        sourceNote = 'расчёт по прошлой лёгкой тренировке';
       } else if (ex.baseline1RM && ex.baseline1RM[hand] > 0) {
         base1RM = Number(ex.baseline1RM[hand]);
-        sourceNote = 'по заданному базовому максимуму';
       }
 
-      const schemeReps = weekType === 'light'
-        ? [10, 10, 10, 8, 8]
-        : (state.settings.heavyScheme === '8-6-6-4-2' ? [8, 6, 6, 4, 2] : [8, 6, 6, 3, 3]);
+      // Determine scheme & percentages
+      let schemeReps, pcts, modeLabel, modeTone;
+      if (weekType === 'heavy') {
+        schemeReps = state.settings.heavyScheme === '8-6-6-4-2' ? [8, 6, 6, 4, 2] : [8, 6, 6, 3, 3];
+        pcts = state.settings.heavyScheme === '8-6-6-4-2'
+          ? [0.60, 0.72, 0.78, 0.86, 0.94]
+          : [0.60, 0.72, 0.78, 0.87, 0.91];
+        const cycleIdx = ((targetWeek - 1) % 4) + 1;
+        modeLabel = deloadMode === 'every4'
+          ? `🔥 Тяжёлая (${cycleIdx} из 3) · ${state.settings.heavyScheme}`
+          : `🔥 Тяжёлая · ${state.settings.heavyScheme}`;
+        modeTone = 'heavy';
+      } else if (deloadMode === 'light') {
+        // Protective side-pressure deload (50-60%, 5 sets)
+        schemeReps = [10, 10, 10, 8, 8];
+        pcts = [0.50, 0.52, 0.55, 0.58, 0.60];
+        modeLabel = '🛡️ Бережём локоть · 50–60%';
+        modeTone = 'safe';
+      } else {
+        // Zheka's working deload: 4 sets 10-10-8-8 with working middle weights (65-78%)
+        schemeReps = [10, 10, 8, 8];
+        pcts = [0.65, 0.70, 0.74, 0.78];
+        modeLabel = deloadMode === 'every4'
+          ? '🌿 Разгрузка (4-я нед.) · 10-10-8-8'
+          : '🌿 Лёгкая · 10-10-8-8';
+        modeTone = 'normal';
+      }
 
       if (base1RM === null) {
         return {
-          type: ex.type, weekType, elbow, pain, needsCalibration: true,
-          schemeReps,
+          type: ex.type, weekType, deloadMode, elbow, pain, needsCalibration: true,
+          schemeReps, modeLabel, modeTone,
           sets: schemeReps.map((r, i) => ({
             setNum: i + 1,
             weight: equip.mode === 'list' ? getSortedList(equip)[0] : (equip.min || 0),
             reps: r,
-            pct: weekType === 'light' ? [50, 52, 55, 58, 60][i] : [60, 72, 78, 87, 91][i],
             restSec: weekType === 'light' ? 90 : (i < 2 ? 90 : i === 2 ? 150 : 210)
-          })),
-          reason: 'Введи стартовый рабочий вес один раз (или просто запиши первую тренировку) — дальше всё рассчитается автоматически.'
+          }))
         };
       }
 
-      // Forecast future progression
       let effective1RM = base1RM;
       if (heavyAhead > 0) {
         effective1RM = base1RM * Math.pow(1.025, heavyAhead);
       }
 
-      // Apply period, elbow, energy
       const totalMult = period.mult * elbow.mult * energyMult;
       const adjusted1RM = effective1RM * totalMult;
-
-      // Percentages for pyramid
-      let pcts;
-      if (weekType === 'light') {
-        // Zoloev slide: 50-60% of max, 10-10-10-8-8
-        pcts = [0.50, 0.52, 0.55, 0.58, 0.60];
-      } else if (state.settings.heavyScheme === '8-6-6-4-2') {
-        pcts = [0.60, 0.72, 0.78, 0.86, 0.94];
-      } else {
-        pcts = [0.60, 0.72, 0.78, 0.87, 0.91];
-      }
 
       let clampedMinAny = false;
       let atMaxAny = false;
@@ -1009,47 +1075,33 @@
       const sets = schemeReps.map((baseReps, idx) => {
         const pct = pcts[idx];
         let rawKg = adjusted1RM * pct;
-        if (isBW) {
-          // Total load = bodyweight + added plates
-          rawKg = Math.max(0, rawKg - bw);
-        }
+        if (isBW) rawKg = Math.max(0, rawKg - bw);
         const snapped = snapWeight(rawKg, equip);
         if (snapped.clampedMin) clampedMinAny = true;
         if (snapped.atMax) atMaxAny = true;
 
-        // Add double-progression reps on top sets of heavy week
         let reps = baseReps;
         if (weekType === 'heavy' && repBoost > 0 && idx >= 3) {
           reps = baseReps + repBoost;
         }
         const restSec = weekType === 'light'
-          ? (ex.hands === 'both' ? 105 : 90)
+          ? (deloadMode === 'light' ? 90 : (idx >= 2 ? 120 : 90))
           : (idx < 2 ? 90 : idx === 2 ? 150 : 210);
 
         return {
           setNum: idx + 1,
           weight: snapped.weight,
           reps,
-          pct: Math.round(pct * 100),
           restSec,
           clampedMin: snapped.clampedMin,
           atMax: snapped.atMax
         };
       });
 
-      const factors = [];
-      if (period.mult !== 1) factors.push(`${period.name} (${Math.round(period.mult * 100)}%)`);
-      if (elbow.mult !== 1) factors.push(`локоть ${Math.round(elbow.mult * 100)}%`);
-      if (energyMult !== 1) factors.push(`усталость 92%`);
-      if (heavyAhead > 0) factors.push(`прогноз +${heavyAhead} сил. нед.`);
-
-      const mainLine = weekType === 'light'
-        ? `Разгрузка 50–60% (10-10-10-8-8) · база 1ПМ ${fmtKg(effective1RM)} кг`
-        : `Силовая (${state.settings.heavyScheme}) · база 1ПМ ${fmtKg(effective1RM)} кг`;
-
       return {
         type: ex.type,
         weekType,
+        deloadMode,
         elbow,
         pain,
         needsCalibration: false,
@@ -1058,16 +1110,19 @@
         clampedMinAny,
         atMaxAny,
         doubleProgNote,
-        reason: [mainLine, sourceNote, ...factors].filter(Boolean).join(' · ')
+        progTag,
+        modeLabel,
+        modeTone
       };
     }
 
     // ==================== UI STATE ====================
     const ui = {
-      tab: 'workout', // workout | plan | progress | gym
+      tab: 'workout',
       selectedDay: 1,
       expandedExId: null,
-      selectedHand: {}, // { [exId]: 'R' | 'L' }
+      selectedHand: {},
+      editBaseKey: null, // `${exId}_${hand}` when editing quick base inline
       factorsOpen: false,
       planWeek: 1,
       planDay: 1,
@@ -1076,10 +1131,8 @@
       progExId: 'd1_hook_mid',
       progHand: 'R',
       histFilter: 'all',
-      gymSub: 'equip', // equip | exercises | program | backup
-      newDumbbell: '',
-      timer: { active: false, remain: 0, total: 0, label: '', interval: null },
-      holdTimer: { active: false, sec: 0, interval: null, key: null }
+      gymSub: 'equip',
+      timer: { active: false, remain: 0, total: 0, label: '', interval: null }
     };
 
     function showToast(msg) {
@@ -1087,16 +1140,12 @@
       el.textContent = msg;
       el.classList.add('show');
       clearTimeout(el._t);
-      el._t = setTimeout(() => el.classList.remove('show'), 2400);
+      el._t = setTimeout(() => el.classList.remove('show'), 2200);
     }
 
     // ==================== REST TIMER ====================
     function beep() {
-      try {
-        if (window.AndroidBridge && window.AndroidBridge.vibrate) {
-          window.AndroidBridge.vibrate();
-        }
-      } catch {}
+      try { if (window.AndroidBridge && window.AndroidBridge.vibrate) window.AndroidBridge.vibrate(); } catch {}
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -1115,7 +1164,7 @@
       ui.timer.active = true;
       ui.timer.total = seconds;
       ui.timer.remain = seconds;
-      ui.timer.label = label || 'Отдых между подходами';
+      ui.timer.label = label || 'Отдых';
       ui.timer.interval = setInterval(() => {
         ui.timer.remain--;
         if (ui.timer.remain <= 0) {
@@ -1123,7 +1172,7 @@
           clearInterval(ui.timer.interval);
           ui.timer.interval = null;
           beep();
-          showToast('Отдых закончен — следующий подход!');
+          showToast('Отдых закончился — пора на подход!');
         }
         updateTimerDom();
       }, 1000);
@@ -1179,9 +1228,7 @@
     }
 
     // ==================== DRAFTS & SAVING WORKOUTS ====================
-    function draftKey(week, exId, hand) {
-      return `w${week}_${exId}_${hand}`;
-    }
+    function draftKey(week, exId, hand) { return `w${week}_${exId}_${hand}`; }
 
     function getOrInitDraft(ex, hand, plan) {
       const k = draftKey(state.settings.currentWeek, ex.id, hand);
@@ -1214,9 +1261,8 @@
       if (ex.hands === 'both') {
         return state.history.some(h => h.week === wk && h.exerciseId === ex.id && h.hand === 'both');
       }
-      const rDone = state.history.some(h => h.week === wk && h.exerciseId === ex.id && h.hand === 'R');
-      const lDone = state.history.some(h => h.week === wk && h.exerciseId === ex.id && h.hand === 'L');
-      return rDone && lDone;
+      return state.history.some(h => h.week === wk && h.exerciseId === ex.id && h.hand === 'R') &&
+             state.history.some(h => h.week === wk && h.exerciseId === ex.id && h.hand === 'L');
     }
 
     function isHandDoneThisWeek(exId, hand) {
@@ -1225,7 +1271,7 @@
 
     function saveExerciseRecord(ex, hand) {
       const wk = state.settings.currentWeek;
-      const weekType = getWeekType(wk, state.settings.startWeekType);
+      const effWeekType = getEffectiveWeekType(ex, wk);
       const plan = computePlan(ex, hand, wk);
       const draft = getOrInitDraft(ex, hand, plan);
       const equip = getEquip(ex.equipId);
@@ -1256,20 +1302,20 @@
           if (ex.type === 'static') {
             e1rm = Math.max(e1rm, s.weight);
           } else if (ex.type === 'bodyweight') {
-            const totalW = bw + s.weight;
-            e1rm = Math.max(e1rm, epley1RM(totalW, Math.max(1, s.reps)));
+            e1rm = Math.max(e1rm, epley1RM(bw + s.weight, Math.max(1, s.reps)));
           } else {
             e1rm = Math.max(e1rm, epley1RM(s.weight, Math.max(1, s.reps)));
           }
         }
       }
 
-      const rec = {
+      state.history.push({
         id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
         date: today,
         ts: Date.now(),
         week: wk,
-        weekType,
+        weekType: effWeekType,
+        deloadMode: ex.deloadMode || 'working',
         day: ex.day,
         exerciseId: ex.id,
         exerciseName: ex.name,
@@ -1283,16 +1329,14 @@
         elbowMult: getElbowFactor(pain).mult,
         e1rm: round2(e1rm),
         note: (draft.note || '').trim()
-      };
+      });
 
-      state.history.push(rec);
       delete state.drafts[draftKey(wk, ex.id, hand)];
       saveState();
 
-      const hLabel = hand === 'R' ? ' (Правая)' : hand === 'L' ? ' (Левая)' : '';
+      const hLabel = hand === 'R' ? ' (П)' : hand === 'L' ? ' (Л)' : '';
       showToast(`Сохранено: ${ex.name}${hLabel}`);
 
-      // If uni and other hand not done yet, switch to other hand automatically!
       if (ex.hands === 'uni') {
         const other = hand === 'R' ? 'L' : 'R';
         if (!isHandDoneThisWeek(ex.id, other)) {
@@ -1306,8 +1350,11 @@
       if (!state.settings.compDate) return null;
       const target = new Date(state.settings.compDate + 'T00:00:00');
       const now = new Date();
-      const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-      return diff;
+      return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+    }
+
+    function effortLabel(e) {
+      return { easy: 'Легко', ok: 'Норм', hard: 'Тяжело', fail: 'Не дожал' }[e] || 'Норм';
     }
 
     // ==================== RENDER FUNCTIONS ====================
@@ -1315,19 +1362,18 @@
       const wk = state.settings.currentWeek;
       const wType = getWeekType(wk, state.settings.startWeekType);
       const daysLeft = daysUntilComp();
-      const period = PERIODS[state.settings.period] || PERIODS.main;
       return `
         <div class="topbar">
           <div class="topbar-row">
             <div class="brand">
               <div class="brand-logo">Z</div>
               <div>
-                <div class="brand-title">ArmPlan · Золоев 3.0</div>
-                <div class="brand-sub">${esc(period.name)}${daysLeft !== null && daysLeft >= 0 ? ` · до марта: ${daysLeft} дн.` : ''}</div>
+                <div class="brand-title">ArmPlan</div>
+                <div class="brand-sub">${daysLeft !== null && daysLeft >= 0 ? `До марта: ${daysLeft} дн.` : 'Программа Золоева'}</div>
               </div>
             </div>
             <span class="badge ${wType === 'heavy' ? 'badge-heavy' : 'badge-light'}">
-              ${wType === 'heavy' ? '🔥 Силовая' : '🌿 Разгрузка'} · Н${wk}
+              ${wType === 'heavy' ? '🔥 Тяжёлая' : '🌿 Лёгкая'} · Н${wk}
             </span>
           </div>
         </div>
@@ -1338,8 +1384,8 @@
       const wk = state.settings.currentWeek;
       const wType = getWeekType(wk, state.settings.startWeekType);
       const dayEx = state.exercises.filter(e => e.day === ui.selectedDay).sort((a, b) => a.order - b.order);
-      const pR = state.settings.elbowPain.R || 0;
-      const pL = state.settings.elbowPain.L || 0;
+      const pR = Number(state.settings.elbowPain.R) || 0;
+      const pL = Number(state.settings.elbowPain.L) || 0;
       const maxPain = Math.max(pR, pL);
 
       const dayTabsHtml = [1, 2, 3, 4].map(d => {
@@ -1350,26 +1396,31 @@
           <button class="day-tab ${ui.selectedDay === d ? 'active' : ''}" data-action="sel-day" data-day="${d}">
             <div class="day-tab-n">День ${d}</div>
             <div class="day-tab-sub">${DAY_INFO[d].short}</div>
-            <div class="day-tab-prog ${allDone ? 'done' : ''}">${allDone ? '✅ Готово' : `${doneCount}/${list.length}`}</div>
+            <div class="day-tab-prog ${allDone ? 'done' : ''}">${allDone ? '✅' : `${doneCount}/${list.length}`}</div>
           </button>
         `;
       }).join('');
+
+      const elbowSummary = maxPain >= 3
+        ? `Локоть: П ${painWord(pR)} / Л ${painWord(pL)}`
+        : 'Локоть: норм';
+      const energySummary = state.settings.energy === 'low' ? 'Устал (−8%)' : 'Силы: норм';
 
       const exHtml = dayEx.map((ex, idx) => renderExerciseCard(ex, idx + 1)).join('');
 
       return `
         <div class="container">
           <div class="week-bar">
-            <button class="week-nav-btn" data-action="week-prev" ${wk <= 1 ? 'style="opacity:0.4"' : ''}>‹</button>
+            <button class="week-nav-btn" data-action="week-prev" ${wk <= 1 ? 'style="opacity:0.35"' : ''}>‹</button>
             <div class="week-info">
               <div class="week-num">
                 Неделя ${wk}
-                <span class="badge ${wType === 'heavy' ? 'badge-heavy' : 'badge-light'}">${wType === 'heavy' ? 'Силовая' : 'Разгрузка 50–60%'}</span>
+                <span class="badge ${wType === 'heavy' ? 'badge-heavy' : 'badge-light'}">${wType === 'heavy' ? 'Тяжёлая' : 'Лёгкая'}</span>
               </div>
               <div class="week-desc">
                 ${wType === 'heavy'
-                  ? `Пирамида ${state.settings.heavyScheme} · отдых 2.5–4 мин на пике`
-                  : `Пирамида 10-10-10-8-8 · динамика, отдых 1–1.5 мин`}
+                  ? `Схема ${state.settings.heavyScheme} · отдых 2–4 мин`
+                  : `10-10-8-8 · боковое 50–60% · жим 3+1`}
               </div>
             </div>
             <button class="week-nav-btn" data-action="week-next">›</button>
@@ -1379,66 +1430,62 @@
 
           <div class="factors-card">
             <div class="factors-summary" data-action="toggle-factors">
-              <div>
-                <strong>Факторы сегодня:</strong>
-                Локоть П:${pR}/10 Л:${pL}/10 ·
-                ${state.settings.energy === 'low' ? 'Устал (−8%)' : state.settings.energy === 'high' ? 'Бодр' : 'Норма'}
-              </div>
+              <div><strong>${elbowSummary}</strong> · <span class="muted">${energySummary}</span></div>
               <span class="badge ${maxPain >= 4 ? 'badge-danger' : maxPain === 3 ? 'badge-heavy' : 'badge-muted'}">
-                ${ui.factorsOpen ? 'Скрыть ▲' : 'Изменить ▼'}
+                ${ui.factorsOpen ? 'Скрыть' : 'Локоть / силы'}
               </span>
             </div>
             ${ui.factorsOpen ? `
               <div class="factors-body">
-                <div class="factor-row">
-                  <span>Боль в правом локте (0–10)</span>
-                  <div class="stepper">
-                    <button data-action="pain-step" data-hand="R" data-dir="-1">−</button>
-                    <span>${pR}</span>
-                    <button data-action="pain-step" data-hand="R" data-dir="1">+</button>
+                <div class="factor-block">
+                  <div class="factor-lbl">Правый локоть</div>
+                  <div class="seg seg-full" style="grid-template-columns:repeat(4,1fr);">
+                    <button class="${pR <= 2 ? 'active' : ''}" data-action="pain-set" data-hand="R" data-val="0">Норм</button>
+                    <button class="${pR === 3 ? 'active-warn' : ''}" data-action="pain-set" data-hand="R" data-val="3">Ноет</button>
+                    <button class="${pR >= 4 && pR <= 6 ? 'active-danger' : ''}" data-action="pain-set" data-hand="R" data-val="5">Болит</button>
+                    <button class="${pR >= 7 ? 'active-danger' : ''}" data-action="pain-set" data-hand="R" data-val="8">Сильно</button>
                   </div>
                 </div>
-                <div class="factor-row">
-                  <span>Боль в левом локте (0–10)</span>
-                  <div class="stepper">
-                    <button data-action="pain-step" data-hand="L" data-dir="-1">−</button>
-                    <span>${pL}</span>
-                    <button data-action="pain-step" data-hand="L" data-dir="1">+</button>
+                <div class="factor-block">
+                  <div class="factor-lbl">Левый локоть</div>
+                  <div class="seg seg-full" style="grid-template-columns:repeat(4,1fr);">
+                    <button class="${pL <= 2 ? 'active' : ''}" data-action="pain-set" data-hand="L" data-val="0">Норм</button>
+                    <button class="${pL === 3 ? 'active-warn' : ''}" data-action="pain-set" data-hand="L" data-val="3">Ноет</button>
+                    <button class="${pL >= 4 && pL <= 6 ? 'active-danger' : ''}" data-action="pain-set" data-hand="L" data-val="5">Болит</button>
+                    <button class="${pL >= 7 ? 'active-danger' : ''}" data-action="pain-set" data-hand="L" data-val="8">Сильно</button>
                   </div>
                 </div>
-                <div class="factor-row">
-                  <span>Самочувствие</span>
-                  <div class="seg">
-                    <button class="${state.settings.energy === 'high' ? 'active' : ''}" data-action="set-energy" data-val="high">Бодр</button>
-                    <button class="${state.settings.energy === 'normal' ? 'active' : ''}" data-action="set-energy" data-val="normal">Норма</button>
-                    <button class="${state.settings.energy === 'low' ? 'active' : ''}" data-action="set-energy" data-val="low">Устал</button>
+                <div class="factor-block">
+                  <div class="factor-lbl">Самочувствие</div>
+                  <div class="seg seg-full" style="grid-template-columns:1fr 1fr;">
+                    <button class="${state.settings.energy !== 'low' ? 'active' : ''}" data-action="set-energy" data-val="normal">Нормально</button>
+                    <button class="${state.settings.energy === 'low' ? 'active-warn' : ''}" data-action="set-energy" data-val="low">Устал (−8%)</button>
                   </div>
                 </div>
                 ${wType === 'heavy' ? `
-                  <div class="factor-row">
-                    <span>Схема тяжёлой</span>
-                    <div class="seg">
+                  <div class="factor-block">
+                    <div class="factor-lbl">Схема тяжёлой</div>
+                    <div class="seg seg-full" style="grid-template-columns:1fr 1fr;">
                       <button class="${state.settings.heavyScheme === '8-6-6-3-3' ? 'active' : ''}" data-action="set-scheme" data-val="8-6-6-3-3">8-6-6-3-3</button>
                       <button class="${state.settings.heavyScheme === '8-6-6-4-2' ? 'active' : ''}" data-action="set-scheme" data-val="8-6-6-4-2">8-6-6-4-2</button>
                     </div>
                   </div>
                 ` : ''}
-                <div class="small muted mt-8">При боли в локте ≥3/10 приложение автоматически снижает веса в крюке, кисти, пронации и за столом для нужной руки.</div>
+                <div class="small muted">Если локоть ноет — сам снижу вес в крюке, кисти и за столом. Пронацию не трогаю.</div>
               </div>
             ` : ''}
           </div>
 
           <div class="row-between" style="margin-bottom:8px; padding:0 2px;">
-            <div style="font-weight:800; font-size:15px;">${DAY_INFO[ui.selectedDay].title}: ${DAY_INFO[ui.selectedDay].full}</div>
+            <div style="font-weight:800; font-size:15px;">${DAY_INFO[ui.selectedDay].full}</div>
             <button class="btn btn-xs" data-action="open-plan-today">План вперёд →</button>
           </div>
 
           ${exHtml}
 
           <div class="card" style="text-align:center; background:var(--bg2);">
-            <div class="small muted" style="margin-bottom:8px;">Закончил все 4 дня недели ${wk}?</div>
             <button class="btn btn-primary btn-block" data-action="week-next">
-              Перейти к Неделе ${wk + 1} (${getWeekType(wk + 1, state.settings.startWeekType) === 'heavy' ? 'Силовая 🔥' : 'Разгрузка 🌿'}) →
+              Следующая неделя — Н${wk + 1} (${getWeekType(wk + 1, state.settings.startWeekType) === 'heavy' ? 'Тяжёлая 🔥' : 'Лёгкая 🌿'}) →
             </button>
           </div>
         </div>
@@ -1451,26 +1498,30 @@
       const done = isExerciseDoneThisWeek(ex);
       const activeHand = ex.hands === 'both' ? 'both' : (ui.selectedHand[ex.id] || 'R');
       const plan = computePlan(ex, activeHand, state.settings.currentWeek);
+      const globalWType = getWeekType(state.settings.currentWeek, state.settings.startWeekType);
 
-      // Compact preview string
+      // Compact badge if this exercise runs a special mode on current week
+      let modeBadge = '';
+      if (ex.type !== 'table') {
+        if (globalWType === 'light' && plan.weekType === 'heavy') {
+          modeBadge = `<span class="badge badge-sm badge-heavy">🔥 тяжёлая</span>`;
+        } else if (plan.weekType === 'light' && ex.deloadMode === 'light') {
+          modeBadge = `<span class="badge badge-sm badge-light">50–60%</span>`;
+        }
+      }
+
       let previewHtml = '';
       if (ex.type === 'table') {
-        previewHtml = `${esc(plan.mode)} · усилие ${plan.intensity}% · ${plan.duration} мин`;
+        previewHtml = `${esc(plan.mode)} · ${plan.intensity}% · ${plan.duration} мин`;
       } else if (plan.needsCalibration) {
-        previewHtml = `<span style="color:var(--heavy);">⚡ Нажми, чтобы задать стартовый вес и рассчитать пирамиду</span>`;
+        previewHtml = `<span style="color:var(--heavy);">Нажми и впиши рабочий вес →</span>`;
       } else if (ex.type === 'static') {
-        previewHtml = plan.sets.map(s => `${fmtKg(s.weight)}кг×${s.sec}с`).join(' · ');
+        previewHtml = plan.sets.map(s => `${fmtKg(s.weight)}×${s.sec}с`).join(' · ');
       } else {
         const prefix = ex.hands === 'uni' ? (activeHand === 'R' ? 'П: ' : 'Л: ') : '';
         const pfxPlus = ex.type === 'bodyweight' ? '+' : '';
         previewHtml = prefix + plan.sets.map(s => `${s.weight > 0 ? pfxPlus + fmtKg(s.weight) : (ex.type === 'bodyweight' ? 'СВ' : '0')}×${s.reps}`).join(' · ');
       }
-
-      const equipHint = equip.mode === 'list'
-        ? `${equip.name} (${getSortedList(equip).join(', ')})`
-        : equip.mode === 'step'
-          ? `${equip.name} · шаг ${fmtKg(equip.step)} кг`
-          : equip.name;
 
       let bodyHtml = '';
       if (isOpen) {
@@ -1484,10 +1535,11 @@
             <div class="ex-meta">
               <div class="ex-name">
                 ${esc(ex.name)}
-                ${ex.elbowRisk && plan.pain >= 3 ? `<span class="badge badge-danger" style="padding:2px 7px;font-size:10.5px;">локоть ${plan.pain}/10</span>` : ''}
+                ${modeBadge}
+                ${ex.elbowRisk && plan.pain >= 3 ? `<span class="badge badge-sm badge-danger">локоть</span>` : ''}
               </div>
               <div class="ex-sub">
-                <span>${esc(equipHint)}</span>
+                <span>${esc(equip.name)}</span>
                 ${ex.hands === 'uni' ? `<span>· ${isHandDoneThisWeek(ex.id, 'R') ? 'П✅' : 'П○'} ${isHandDoneThisWeek(ex.id, 'L') ? 'Л✅' : 'Л○'}</span>` : ''}
               </div>
               ${!isOpen ? `<div class="ex-preview">${previewHtml}</div>` : ''}
@@ -1502,6 +1554,8 @@
     function renderExerciseBody(ex, hand, plan, equip) {
       const draft = getOrInitDraft(ex, hand, plan);
       const handDone = isHandDoneThisWeek(ex.id, hand);
+      const editKey = `${ex.id}_${hand}`;
+      const showCalib = plan.needsCalibration || ui.editBaseKey === editKey;
 
       const handTabs = ex.hands === 'uni' ? `
         <div class="hand-tabs">
@@ -1512,7 +1566,7 @@
             Левая ${isHandDoneThisWeek(ex.id, 'L') ? '✅' : ''}
           </button>
         </div>
-      ` : '<div style="height:8px;"></div>';
+      ` : '<div style="height:6px;"></div>';
 
       const elbowWarn = plan.elbow && plan.elbow.msg
         ? `<div class="warn-box">⚠️ ${esc(plan.elbow.msg)}</div>`
@@ -1523,7 +1577,9 @@
           <div class="ex-body">
             ${handTabs}
             ${elbowWarn}
-            <div class="reason-box">💡 ${esc(plan.reason)}</div>
+            <div class="mode-strip ${plan.weekType === 'heavy' ? 'heavy' : 'safe'}">
+              <span>${esc(plan.reason)}</span>
+            </div>
             <div class="grid-2 mt-8">
               <div>
                 <div class="small muted" style="margin-bottom:4px;">Формат</div>
@@ -1539,45 +1595,63 @@
               </div>
             </div>
             <div class="mt-8">
-              <div class="small muted" style="margin-bottom:4px;">Длительность (мин)</div>
+              <div class="small muted" style="margin-bottom:4px;">Время (мин)</div>
               <input class="inp" type="number" inputmode="numeric" value="${esc(draft.duration)}" data-action="draft-table" data-id="${ex.id}" data-hand="${hand}" data-field="duration" />
             </div>
             <div class="mt-8">
-              <input class="inp inp-text" placeholder="Заметка (с кем боролся, как локоть...)" value="${esc(draft.note || '')}" data-action="draft-note" data-id="${ex.id}" data-hand="${hand}" />
+              <input class="inp inp-text" placeholder="Заметка (необязательно)" value="${esc(draft.note || '')}" data-action="draft-note" data-id="${ex.id}" data-hand="${hand}" />
             </div>
             <button class="btn btn-ok btn-block mt-12" data-action="save-ex" data-id="${ex.id}" data-hand="${hand}">
-              ${handDone ? '✅ Записать ещё раз в историю' : '✅ Сохранить в историю'}
+              ✅ Сохранить${ex.hands === 'uni' ? (hand === 'R' ? ' (Правая)' : ' (Левая)') : ''}
             </button>
           </div>
         `;
       }
 
-      // Calibration quick box if no history/baseline yet
-      const calibBox = plan.needsCalibration ? `
+      const calibBox = showCalib ? `
         <div class="calib-box">
-          <div style="font-weight:700; font-size:13px; color:var(--heavy);">⚡ Быстрый старт (один раз)</div>
-          <div class="small" style="margin-top:2px;">Впиши свой обычный рабочий вес ${ex.type === 'bodyweight' ? '(доп. вес на поясе, 0 = свой вес)' : '(кг)'} и сколько повторов делаешь — приложение сразу распишет пирамиду на все недели:</div>
+          <div class="row-between">
+            <div style="font-weight:700; font-size:13.5px; color:var(--heavy);">Твой рабочий вес</div>
+            ${!plan.needsCalibration ? `<button class="btn btn-xs" data-action="close-calib">✕</button>` : ''}
+          </div>
+          <div class="small muted" style="margin-top:2px;">
+            ${ex.type === 'bodyweight' ? 'Вес на поясе (0 = свой вес) и повторы:' : (ex.type === 'static' ? 'Рабочий вес блинов (кг):' : 'Впиши плотный рабочий вес и повторы — распишу подходы:')}
+          </div>
           <div class="calib-row">
             <input id="calib-w-${ex.id}-${hand}" class="inp" type="number" step="0.25" inputmode="decimal" placeholder="Кг" style="flex:1;" />
-            <span class="muted">×</span>
-            <input id="calib-r-${ex.id}-${hand}" class="inp" type="number" inputmode="numeric" value="${ex.type === 'static' ? 15 : 6}" placeholder="${ex.type === 'static' ? 'сек' : 'повт'}" style="width:70px;" />
-            <button class="btn btn-primary btn-sm" data-action="apply-calib" data-id="${ex.id}" data-hand="${hand}">Рассчитать</button>
+            ${ex.type !== 'static' ? `
+              <span class="muted">×</span>
+              <input id="calib-r-${ex.id}-${hand}" class="inp" type="number" inputmode="numeric" value="8" placeholder="повт" style="width:68px;" />
+            ` : ''}
+            <button class="btn btn-primary btn-sm" data-action="apply-calib" data-id="${ex.id}" data-hand="${hand}">Ок</button>
           </div>
         </div>
       ` : '';
 
-      const extraNotes = [];
-      if (plan.doubleProgNote) extraNotes.push(`📈 ${plan.doubleProgNote}`);
-      if (plan.clampedMinAny) extraNotes.push(`ℹ️ Расчётный вес ниже минимального снаряда (${fmtKg(equip.mode === 'list' ? getSortedList(equip)[0] : equip.min)} кг) — поставлен минимум зала.`);
-      if (plan.atMaxAny) extraNotes.push(`🔥 Достигнут максимум в списке «${equip.name}» — добавь более тяжёлый вес во вкладке «Зал».`);
+      const modeStrip = !plan.needsCalibration ? `
+        <div class="mode-strip ${plan.modeTone || ''}">
+          <div>
+            <strong>${esc(plan.modeLabel)}</strong>
+            ${plan.progTag ? `<span class="badge badge-sm badge-accent" style="margin-left:5px;">${esc(plan.progTag)}</span>` : ''}
+          </div>
+          <button class="mode-base-btn" data-action="open-calib" data-key="${editKey}">
+            макс ~${fmtKg(plan.base1RM)} кг ✎
+          </button>
+        </div>
+      ` : '';
+
+      const tips = [];
+      if (plan.doubleProgNote) tips.push(plan.doubleProgNote);
+      if (plan.atMaxAny) tips.push(`Дошли до макс. веса в «${equip.name}» — добавь новый вес в «Зал».`);
+      const tipHtml = tips.length ? `<div class="tip-box">${tips.map(t => esc(t)).join('<br>')}</div>` : '';
 
       const isStatic = ex.type === 'static';
       const setRowsHtml = draft.sets.map((s, idx) => {
         const target = plan.sets[idx] || {};
         const targetStr = isStatic
-          ? `${fmtKg(target.weight)} кг × ${target.sec || 15} с`
-          : `${ex.type === 'bodyweight' && target.weight === 0 ? 'СВ' : (ex.type === 'bodyweight' ? '+' : '') + fmtKg(target.weight) + ' кг'} × ${target.reps}`;
-        const subStr = target.pct ? `${target.pct}% · отд. ${fmtTime(target.restSec || 90)}` : `отд. ${fmtTime(target.restSec || 90)}`;
+          ? `${fmtKg(target.weight)} × ${target.sec || 15}с`
+          : `${ex.type === 'bodyweight' && target.weight === 0 ? 'СВ' : (ex.type === 'bodyweight' ? '+' : '') + fmtKg(target.weight)} × ${target.reps}`;
+        const subStr = `отдых ${fmtTime(target.restSec || 90)}`;
 
         return `
           <div class="set-row ${s.done ? 'done' : ''}">
@@ -1603,7 +1677,7 @@
 
       const lastRecs = getHistoryFor(ex.id, hand);
       const lastInfo = lastRecs[0]
-        ? `<div class="small muted mt-8">Прошлый раз (${lastRecs[0].date}, Н${lastRecs[0].week} ${lastRecs[0].weekType === 'heavy' ? 'сил.' : 'лёгк.'}): ${lastRecs[0].sets.map(s => `${fmtKg(s.weight)}×${isStatic ? s.sec + 'с' : s.reps}`).join(', ')} (${effortLabel(lastRecs[0].effort)})</div>`
+        ? `<div class="small muted mt-8">Прошлый раз: ${lastRecs[0].sets.map(s => `${fmtKg(s.weight)}×${isStatic ? s.sec + 'с' : s.reps}`).join(' · ')} (${effortLabel(lastRecs[0].effort)})</div>`
         : '';
 
       return `
@@ -1611,15 +1685,13 @@
           ${handTabs}
           ${elbowWarn}
           ${calibBox}
-          <div class="reason-box">
-            <div>🧠 ${esc(plan.reason)}</div>
-            ${extraNotes.map(n => `<div style="margin-top:4px; color:#bae6fd;">${esc(n)}</div>`).join('')}
-          </div>
+          ${modeStrip}
+          ${tipHtml}
 
           <div class="set-head">
             <div>#</div>
             <div>План</div>
-            <div>Факт (кг)</div>
+            <div>Вес (кг)</div>
             <div>${isStatic ? 'Сек' : 'Повт'}</div>
             <div>✓</div>
           </div>
@@ -1627,10 +1699,10 @@
 
           <div class="row-between mt-8">
             <button class="btn btn-xs" data-action="add-set" data-id="${ex.id}" data-hand="${hand}">+ Подход</button>
-            <button class="btn btn-xs" data-action="reset-draft" data-id="${ex.id}" data-hand="${hand}">↻ Подставить план</button>
+            <button class="btn btn-xs" data-action="reset-draft" data-id="${ex.id}" data-hand="${hand}">По плану</button>
           </div>
 
-          <div class="small muted mt-12">Как зашло (влияет на расчёт следующей тяжёлой недели):</div>
+          <div class="small muted mt-12">Как зашло?</div>
           <div class="effort-row">
             ${['easy', 'ok', 'hard', 'fail'].map(ef => `
               <button class="eff-btn ${draft.effort === ef ? 'active' : ''}" data-eff="${ef}" data-action="set-effort" data-id="${ex.id}" data-hand="${hand}">
@@ -1639,21 +1711,17 @@
             `).join('')}
           </div>
 
-          <input class="inp inp-text" placeholder="Заметка (техника, ощущения в локте...)" value="${esc(draft.note || '')}" data-action="draft-note" data-id="${ex.id}" data-hand="${hand}" />
+          <input class="inp inp-text" placeholder="Заметка (необязательно)" value="${esc(draft.note || '')}" data-action="draft-note" data-id="${ex.id}" data-hand="${hand}" />
           ${lastInfo}
 
           <button class="btn btn-ok btn-block mt-12" data-action="save-ex" data-id="${ex.id}" data-hand="${hand}">
-            ${handDone ? '✅ Записать ещё подход-сессию' : `✅ Сохранить${ex.hands === 'uni' ? (hand === 'R' ? ' (Правая)' : ' (Левая)') : ''} в историю`}
+            ${handDone ? '✅ Сохранить ещё раз' : `✅ Сохранить${ex.hands === 'uni' ? (hand === 'R' ? ' (Правая)' : ' (Левая)') : ''}`}
           </button>
         </div>
       `;
     }
 
-    function effortLabel(e) {
-      return { easy: 'Легко', ok: 'Норма', hard: 'Тяжело', fail: 'Отказ' }[e] || 'Норма';
-    }
-
-    // ==================== PLAN TAB (MULTI-WEEK FORECAST) ====================
+    // ==================== PLAN TAB ====================
     function renderPlanTab() {
       const startW = Math.max(1, state.settings.currentWeek);
       const weeks = [];
@@ -1668,7 +1736,7 @@
         return `
           <button class="wk-pill ${ui.planWeek === w ? 'active' : ''}" data-action="plan-week" data-week="${w}">
             <div class="wk-pill-n">Нед. ${w}</div>
-            <div class="wk-pill-t ${wt}">${wt === 'heavy' ? '🔥 Сил.' : '🌿 Лёгк.'}</div>
+            <div class="wk-pill-t ${wt}">${wt === 'heavy' ? '🔥 Тяж.' : '🌿 Лёгк.'}</div>
           </button>
         `;
       }).join('');
@@ -1676,15 +1744,20 @@
       const rowsHtml = dayEx.map((ex, i) => {
         const hand = ex.hands === 'both' ? 'both' : ui.planHand;
         const plan = computePlan(ex, hand, ui.planWeek, { isForecast: ui.planWeek > state.settings.currentWeek, ignorePain: ui.planIgnorePain });
-        const equip = getEquip(ex.equipId);
+
+        let tag = '';
+        if (ex.type !== 'table') {
+          if (wType === 'light' && plan.weekType === 'heavy') tag = `<span class="badge badge-sm badge-heavy">тяжёлая</span>`;
+          else if (plan.weekType === 'light' && ex.deloadMode === 'light') tag = `<span class="badge badge-sm badge-light">50–60%</span>`;
+        }
 
         let detail = '';
         if (ex.type === 'table') {
           detail = `<div class="small" style="color:#cbd5e1; margin-top:4px;">${esc(plan.mode)} · ${plan.intensity}% · ${plan.duration} мин</div>`;
         } else if (plan.needsCalibration) {
-          detail = `<div class="small" style="color:var(--heavy); margin-top:4px;">Нужен стартовый вес (задай в «Тренировке» или «Зале»)</div>`;
+          detail = `<div class="small muted" style="margin-top:4px;">Вес ещё не задан</div>`;
         } else if (ex.type === 'static') {
-          detail = `<div class="ex-preview">${plan.sets.map(s => `${fmtKg(s.weight)}кг×${s.sec}с`).join(' · ')}</div>`;
+          detail = `<div class="ex-preview">${plan.sets.map(s => `${fmtKg(s.weight)}×${s.sec}с`).join(' · ')}</div>`;
         } else {
           const pfx = ex.type === 'bodyweight' ? '+' : '';
           detail = `<div class="ex-preview">${plan.sets.map(s => `${s.weight === 0 && ex.type === 'bodyweight' ? 'СВ' : pfx + fmtKg(s.weight)}×${s.reps}`).join('  →  ')}</div>`;
@@ -1694,7 +1767,7 @@
           <div class="card" style="padding:11px 12px; margin-bottom:8px;">
             <div class="row-between">
               <div style="font-weight:700; font-size:14px;">${i + 1}. ${esc(ex.name)}</div>
-              <span class="small muted">${esc(equip.name)}</span>
+              ${tag}
             </div>
             ${detail}
             ${plan.doubleProgNote ? `<div class="small" style="color:var(--accent); margin-top:4px;">${esc(plan.doubleProgNote)}</div>` : ''}
@@ -1705,14 +1778,9 @@
 
       return `
         <div class="container">
-          <div class="card" style="padding:11px 12px;">
-            <div class="row-between">
-              <div>
-                <div style="font-weight:800;">Прогноз по неделям и дням</div>
-                <div class="small muted">С учётом снарядов зала, прогрессии и периода</div>
-              </div>
-              <span class="badge ${wType === 'heavy' ? 'badge-heavy' : 'badge-light'}">${wType === 'heavy' ? 'Силовая' : 'Разгрузка'}</span>
-            </div>
+          <div class="row-between" style="margin-bottom:10px;">
+            <div style="font-weight:800; font-size:16px;">План наперёд</div>
+            <span class="badge ${wType === 'heavy' ? 'badge-heavy' : 'badge-light'}">${wType === 'heavy' ? '🔥 Тяжёлая' : '🌿 Лёгкая'} · Н${ui.planWeek}</span>
           </div>
 
           <div class="week-strip">${stripHtml}</div>
@@ -1728,11 +1796,11 @@
 
           <div class="row-between" style="margin-bottom:10px;">
             <div class="seg">
-              <button class="${ui.planHand === 'R' ? 'active' : ''}" data-action="plan-hand" data-hand="R">Правая рука</button>
-              <button class="${ui.planHand === 'L' ? 'active' : ''}" data-action="plan-hand" data-hand="L">Левая рука</button>
+              <button class="${ui.planHand === 'R' ? 'active' : ''}" data-action="plan-hand" data-hand="R">Правая</button>
+              <button class="${ui.planHand === 'L' ? 'active' : ''}" data-action="plan-hand" data-hand="L">Левая</button>
             </div>
             <button class="btn btn-xs ${ui.planIgnorePain ? 'btn-primary' : ''}" data-action="plan-toggle-pain">
-              ${ui.planIgnorePain ? 'Локоть: здоров (0)' : 'С учётом локтя'}
+              ${ui.planIgnorePain ? 'Без скидки на локоть' : 'С учётом локтя'}
             </button>
           </div>
 
@@ -1740,7 +1808,7 @@
 
           ${ui.planWeek !== state.settings.currentWeek ? `
             <button class="btn btn-primary btn-block" data-action="jump-to-week" data-week="${ui.planWeek}">
-              Сделать Неделю ${ui.planWeek} текущей и начать тренировку →
+              Перейти на Неделю ${ui.planWeek} →
             </button>
           ` : ''}
         </div>
@@ -1755,9 +1823,8 @@
 
       const progEx = state.exercises.find(e => e.id === ui.progExId) || state.exercises[0];
       const activeHand = progEx.hands === 'both' ? 'both' : ui.progHand;
-      const recs = getHistoryFor(progEx.id, activeHand).slice().reverse(); // oldest -> newest
+      const recs = getHistoryFor(progEx.id, activeHand).slice().reverse();
 
-      // PRs
       let maxW = 0, max1RM = 0;
       for (const r of recs) {
         if (r.e1rm > max1RM) max1RM = r.e1rm;
@@ -1766,8 +1833,7 @@
         }
       }
 
-      // SVG Line chart
-      let chartHtml = '<div class="small muted" style="text-align:center; padding:18px 8px;">Пока нет записей по этому упражнению — сохрани первую тренировку, и здесь появится график роста.</div>';
+      let chartHtml = '<div class="small muted" style="text-align:center; padding:18px 8px;">Сохрани первую тренировку — здесь появится график роста.</div>';
       if (recs.length >= 1 && progEx.type !== 'table') {
         const pts = recs.map((r, i) => ({
           x: i,
@@ -1806,24 +1872,24 @@
         .sort((a, b) => (b.ts || 0) - (a.ts || 0));
 
       const histHtml = filteredHist.length ? filteredHist.slice(0, 50).map(h => {
-        const handStr = h.hand === 'R' ? 'Правая' : h.hand === 'L' ? 'Левая' : 'Обе руки';
+        const handStr = h.hand === 'R' ? 'Правая' : h.hand === 'L' ? 'Левая' : 'Обе';
         const setsStr = h.type === 'table'
           ? `${h.sets[0]?.mode || 'Стол'} · ${h.sets[0]?.weight || 0}% · ${h.sets[0]?.reps || 0} мин`
-          : (h.sets || []).map(s => `${fmtKg(s.weight)}кг×${h.type === 'static' ? (s.sec || 0) + 'с' : s.reps}`).join(' · ');
+          : (h.sets || []).map(s => `${fmtKg(s.weight)}×${h.type === 'static' ? (s.sec || 0) + 'с' : s.reps}`).join(' · ');
         return `
           <div class="hist-item">
             <div class="hist-top">
               <div>
                 <div style="font-weight:700; font-size:14px;">${esc(h.exerciseName)}</div>
-                <div class="small muted">${h.date} · Нед.${h.week} (${h.weekType === 'heavy' ? 'Силовая' : 'Разгр.'}) · ${handStr} · ${effortLabel(h.effort)}${h.elbowPain ? ` · локоть ${h.elbowPain}/10` : ''}</div>
+                <div class="small muted">${h.date} · Н${h.week} (${h.weekType === 'heavy' ? 'Тяж.' : 'Лёгк.'}) · ${handStr} · ${effortLabel(h.effort)}</div>
               </div>
               <button class="btn btn-xs btn-danger" data-action="del-hist" data-id="${h.id}">✕</button>
             </div>
-            <div class="hist-sets">${esc(setsStr)}${h.e1rm > 0 && h.type !== 'static' ? ` <span class="muted">(1ПМ ~${fmtKg(h.e1rm)} кг)</span>` : ''}</div>
-            ${h.note ? `<div class="small muted" style="margin-top:4px;">📝 ${esc(h.note)}</div>` : ''}
+            <div class="hist-sets">${esc(setsStr)}</div>
+            ${h.note ? `<div class="small muted" style="margin-top:4px;">${esc(h.note)}</div>` : ''}
           </div>
         `;
-      }).join('') : `<div class="card small muted" style="text-align:center;">История пока пуста. Выполни и сохрани первое упражнение во вкладке «Тренировка».</div>`;
+      }).join('') : `<div class="card small muted" style="text-align:center;">История пока пуста.</div>`;
 
       return `
         <div class="container">
@@ -1834,7 +1900,7 @@
           </div>
 
           <div class="card">
-            <div class="card-title" style="margin-bottom:8px;">📈 График прогресса (расч. 1ПМ, кг)</div>
+            <div class="card-title" style="margin-bottom:8px;">📈 Рост силы (макс, кг)</div>
             <select data-action="prog-ex">
               ${[1, 2, 3, 4].map(d => `
                 <optgroup label="День ${d} — ${DAY_INFO[d].full}">
@@ -1852,15 +1918,15 @@
             ` : ''}
             ${recs.length ? `
               <div class="grid-2 mt-8">
-                <div class="stat-box" style="background:var(--bg2);"><div class="stat-val" style="font-size:16px;">${fmtKg(maxW)} кг</div><div class="stat-lbl">Макс. вес (PR)</div></div>
-                <div class="stat-box" style="background:var(--bg2);"><div class="stat-val" style="font-size:16px;">${fmtKg(max1RM)} кг</div><div class="stat-lbl">Лучший 1ПМ</div></div>
+                <div class="stat-box" style="background:var(--bg2);"><div class="stat-val" style="font-size:16px;">${fmtKg(maxW)} кг</div><div class="stat-lbl">Лучший вес</div></div>
+                <div class="stat-box" style="background:var(--bg2);"><div class="stat-val" style="font-size:16px;">${fmtKg(max1RM)} кг</div><div class="stat-lbl">Расч. макс</div></div>
               </div>
             ` : ''}
             <div class="chart-wrap">${chartHtml}</div>
           </div>
 
           <div class="row-between" style="margin:12px 0 8px;">
-            <div style="font-weight:800;">Журнал истории (${filteredHist.length})</div>
+            <div style="font-weight:800;">История (${filteredHist.length})</div>
             <select style="width:auto; padding:5px 9px; font-size:12px;" data-action="hist-filter">
               <option value="all" ${ui.histFilter === 'all' ? 'selected' : ''}>Все дни</option>
               <option value="1" ${ui.histFilter === '1' ? 'selected' : ''}>День 1</option>
@@ -1877,7 +1943,7 @@
     // ==================== GYM & SETTINGS TAB ====================
     function renderGymTab() {
       const subNav = `
-        <div class="seg" style="width:100%; display:grid; grid-template-columns:repeat(4,1fr); margin-bottom:11px;">
+        <div class="seg seg-full" style="grid-template-columns:repeat(4,1fr); margin-bottom:11px;">
           <button class="${ui.gymSub === 'equip' ? 'active' : ''}" data-action="gym-sub" data-sub="equip">Снаряды</button>
           <button class="${ui.gymSub === 'exercises' ? 'active' : ''}" data-action="gym-sub" data-sub="exercises">Упражн.</button>
           <button class="${ui.gymSub === 'program' ? 'active' : ''}" data-action="gym-sub" data-sub="program">Цикл</button>
@@ -1893,13 +1959,12 @@
         const stepEquips = Object.values(state.equipment).filter(e => e.mode === 'step');
 
         content = `
-          <div class="reason-box" style="margin-top:0;">
-            🔒 <strong>История защищена:</strong> меняй шаг блоков, веса грифов и добавляй гантели в любой момент — все прошлые записи останутся без изменений, пересчитаются только будущие планы.
+          <div class="tip-box" style="margin-top:0;">
+            Меняй веса и шаг зала в любой момент — история не пропадёт.
           </div>
 
           <div class="card">
-            <div class="card-title">🏋️ Гантели в зале (кг)</div>
-            <div class="small muted">Нажми «×», чтобы убрать вес, или добавь новый, когда дойдёшь до него.</div>
+            <div class="card-title">Гантели (кг)</div>
             <div class="pill-wrap">
               ${dbList.map(w => `
                 <span class="w-pill">
@@ -1909,23 +1974,22 @@
               `).join('')}
             </div>
             <div class="row mt-8">
-              <input id="new-db-input" class="inp" type="number" step="0.5" inputmode="decimal" placeholder="Например 25" style="flex:1;" />
+              <input id="new-db-input" class="inp" type="number" step="0.5" inputmode="decimal" placeholder="Добавить, напр. 25" style="flex:1;" />
               <button class="btn btn-primary btn-sm" data-action="add-db">+ Добавить</button>
             </div>
           </div>
 
           ${stepEquips.map(eq => `
             <div class="card">
-              <div class="card-title">${esc(eq.name)}</div>
-              <div class="small muted" style="margin-bottom:8px;">${esc(eq.note || '')}</div>
+              <div class="card-title" style="margin-bottom:8px;">${esc(eq.name)}</div>
               <div class="grid-2">
                 <div>
-                  <div class="small muted" style="margin-bottom:3px;">Базовый / мин. вес (кг)</div>
+                  <div class="small muted" style="margin-bottom:3px;">Мин. вес (кг)</div>
                   <input class="inp" type="number" step="0.25" inputmode="decimal" value="${fmtKg(eq.min)}"
                     data-action="upd-equip" data-id="${eq.id}" data-field="min" />
                 </div>
                 <div>
-                  <div class="small muted" style="margin-bottom:3px;">Мин. шаг (кг)</div>
+                  <div class="small muted" style="margin-bottom:3px;">Шаг (кг)</div>
                   <input class="inp" type="number" step="0.25" inputmode="decimal" value="${fmtKg(eq.step)}"
                     data-action="upd-equip" data-id="${eq.id}" data-field="step" />
                 </div>
@@ -1937,9 +2001,9 @@
         const equipOpts = Object.values(state.equipment);
         content = `
           <div class="card">
-            <div class="card-title">➕ Добавить своё упражнение</div>
+            <div class="card-title">➕ Добавить упражнение</div>
             <div class="mt-8">
-              <input id="new-ex-name" class="inp inp-text" placeholder="Название упражнения" />
+              <input id="new-ex-name" class="inp inp-text" placeholder="Название" />
             </div>
             <div class="grid-2 mt-8">
               <select id="new-ex-day">
@@ -1954,8 +2018,8 @@
             </div>
             <div class="grid-2 mt-8">
               <select id="new-ex-hands">
-                <option value="uni">По одной руке (П/Л)</option>
-                <option value="both">Обе руки вместе</option>
+                <option value="uni">По одной руке</option>
+                <option value="both">Обе руки</option>
               </select>
               <button class="btn btn-primary btn-sm" data-action="add-custom-ex">Добавить</button>
             </div>
@@ -1966,33 +2030,40 @@
             ${state.exercises.filter(e => e.day === d).map(ex => `
               <div class="card" style="padding:10px 12px; margin-bottom:8px;">
                 <div class="row-between">
-                  <div style="font-weight:700; font-size:13.5px;">${esc(ex.name)}</div>
+                  <div style="font-weight:700; font-size:14px;">${esc(ex.name)}</div>
                   <label class="small muted row" style="gap:4px;">
                     <input type="checkbox" ${ex.elbowRisk ? 'checked' : ''} data-action="ex-elbow-risk" data-id="${ex.id}" /> локоть
                   </label>
                 </div>
-                <div class="mt-8">
+                <div class="grid-2 mt-8">
                   <select style="padding:6px 8px; font-size:12.5px;" data-action="ex-change-equip" data-id="${ex.id}">
                     ${equipOpts.map(eq => `<option value="${eq.id}" ${eq.id === ex.equipId ? 'selected' : ''}>${esc(eq.name)}</option>`).join('')}
                   </select>
+                  ${ex.type !== 'table' ? `
+                    <select style="padding:6px 8px; font-size:12.5px;" data-action="ex-deload-mode" data-id="${ex.id}">
+                      ${Object.entries(DELOAD_MODES).map(([k, lbl]) => `
+                        <option value="${k}" ${(ex.deloadMode || 'working') === k ? 'selected' : ''}>${esc(lbl)}</option>
+                      `).join('')}
+                    </select>
+                  ` : '<div></div>'}
                 </div>
                 ${ex.type !== 'table' ? `
                   <div class="grid-2 mt-8">
                     ${ex.hands === 'uni' ? `
                       <div>
-                        <div class="small muted">База 1ПМ Правая (кг)</div>
+                        <div class="small muted">Макс Правая (кг)</div>
                         <input class="inp" style="padding:5px;" type="number" step="0.5" inputmode="decimal" placeholder="авто" value="${ex.baseline1RM?.R || ''}"
                           data-action="ex-base" data-id="${ex.id}" data-hand="R" />
                       </div>
                       <div>
-                        <div class="small muted">База 1ПМ Левая (кг)</div>
+                        <div class="small muted">Макс Левая (кг)</div>
                         <input class="inp" style="padding:5px;" type="number" step="0.5" inputmode="decimal" placeholder="авто" value="${ex.baseline1RM?.L || ''}"
                           data-action="ex-base" data-id="${ex.id}" data-hand="L" />
                       </div>
                     ` : `
                       <div style="grid-column:span 2;">
-                        <div class="small muted">Базовый 1ПМ (кг, для подтягиваний — с весом тела)</div>
-                        <input class="inp" style="padding:5px;" type="number" step="0.5" inputmode="decimal" placeholder="авто по истории" value="${ex.baseline1RM?.both || ''}"
+                        <div class="small muted">Макс на 1 раз (кг)</div>
+                        <input class="inp" style="padding:5px;" type="number" step="0.5" inputmode="decimal" placeholder="авто" value="${ex.baseline1RM?.both || ''}"
                           data-action="ex-base" data-id="${ex.id}" data-hand="both" />
                       </div>
                     `}
@@ -2005,41 +2076,41 @@
       } else if (ui.gymSub === 'program') {
         content = `
           <div class="card">
-            <div class="card-title" style="margin-bottom:10px;">Настройки курса Золоева</div>
+            <div class="card-title" style="margin-bottom:10px;">Настройки цикла</div>
             <div style="margin-bottom:10px;">
-              <div class="small muted" style="margin-bottom:4px;">Текущий период подготовки</div>
-              <select data-action="set-period">
-                ${Object.entries(PERIODS).map(([k, p]) => `
-                  <option value="${k}" ${state.settings.period === k ? 'selected' : ''}>${p.name} (${Math.round(p.mult * 100)}%) — ${p.desc}</option>
-                `).join('')}
-              </select>
-            </div>
-            <div style="margin-bottom:10px;">
-              <div class="small muted" style="margin-bottom:4px;">Схема силовой (тяжёлой) недели</div>
-              <div class="seg" style="width:100%; display:grid; grid-template-columns:1fr 1fr;">
+              <div class="small muted" style="margin-bottom:4px;">Схема тяжёлой недели</div>
+              <div class="seg seg-full" style="grid-template-columns:1fr 1fr;">
                 <button class="${state.settings.heavyScheme === '8-6-6-3-3' ? 'active' : ''}" data-action="set-scheme" data-val="8-6-6-3-3">8-6-6-3-3</button>
                 <button class="${state.settings.heavyScheme === '8-6-6-4-2' ? 'active' : ''}" data-action="set-scheme" data-val="8-6-6-4-2">8-6-6-4-2</button>
               </div>
             </div>
             <div style="margin-bottom:10px;">
-              <div class="small muted" style="margin-bottom:4px;">С какой недели начинается цикл (Неделя 1)</div>
-              <div class="seg" style="width:100%; display:grid; grid-template-columns:1fr 1fr;">
-                <button class="${state.settings.startWeekType === 'light' ? 'active' : ''}" data-action="set-start-wt" data-val="light">🌿 Разгрузка (50–60%)</button>
-                <button class="${state.settings.startWeekType === 'heavy' ? 'active' : ''}" data-action="set-start-wt" data-val="heavy">🔥 Силовая (макс)</button>
+              <div class="small muted" style="margin-bottom:4px;">С какой недели начинать (Н1)</div>
+              <div class="seg seg-full" style="grid-template-columns:1fr 1fr;">
+                <button class="${state.settings.startWeekType === 'light' ? 'active' : ''}" data-action="set-start-wt" data-val="light">🌿 Лёгкая</button>
+                <button class="${state.settings.startWeekType === 'heavy' ? 'active' : ''}" data-action="set-start-wt" data-val="heavy">🔥 Тяжёлая</button>
               </div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div class="small muted" style="margin-bottom:4px;">Период</div>
+              <select data-action="set-period">
+                ${Object.entries(PERIODS).map(([k, p]) => `
+                  <option value="${k}" ${state.settings.period === k ? 'selected' : ''}>${p.name} (${Math.round(p.mult * 100)}%)</option>
+                `).join('')}
+              </select>
             </div>
             <div class="grid-2">
               <div>
-                <div class="small muted" style="margin-bottom:4px;">Вес тела (кг, кат. 75)</div>
+                <div class="small muted" style="margin-bottom:4px;">Свой вес (кг)</div>
                 <input class="inp" type="number" step="0.5" inputmode="decimal" value="${fmtKg(state.settings.bodyweight)}" data-action="set-bw" />
               </div>
               <div>
-                <div class="small muted" style="margin-bottom:4px;">Цель (соревнования)</div>
+                <div class="small muted" style="margin-bottom:4px;">Соревнования</div>
                 <input class="inp" type="date" value="${esc(state.settings.compDate || '2027-03-15')}" data-action="set-comp" />
               </div>
             </div>
             <div class="row-between mt-12">
-              <span class="small">Автозапуск таймера отдыха при отметке подхода</span>
+              <span class="small">Автозапуск таймера отдыха</span>
               <input type="checkbox" ${state.settings.autoTimer ? 'checked' : ''} data-action="set-autotimer" style="width:20px; height:20px;" />
             </div>
           </div>
@@ -2047,24 +2118,21 @@
       } else {
         content = `
           <div class="card">
-            <div class="card-title">💾 Резервная копия истории</div>
-            <div class="small muted mt-8">
-              Все данные хранятся в двух независимых хранилищах телефона (localStorage + IndexedDB). На всякий случай (смена телефона / чистка браузера) раз в пару недель сохраняй резервную копию.
-            </div>
+            <div class="card-title">💾 Сохранить копию</div>
+            <div class="small muted mt-8">На случай смены телефона сохрани копию истории в Telegram или Заметки.</div>
             <div class="grid-2 mt-12">
-              <button class="btn btn-primary" data-action="export-file">⬇ Скачать JSON</button>
-              <button class="btn" data-action="export-copy">📋 Скопировать код</button>
+              <button class="btn btn-primary" data-action="export-file">⬇ Файл</button>
+              <button class="btn" data-action="export-copy">📋 Скопировать</button>
             </div>
           </div>
 
           <div class="card">
-            <div class="card-title">📥 Восстановить из резервной копии</div>
-            <div class="small muted mt-8">Выбери ранее сохранённый JSON-файл или вставь скопированный код ниже:</div>
+            <div class="card-title">📥 Восстановить</div>
             <div class="mt-8">
               <input id="import-file" type="file" accept=".json,application/json" style="width:100%; font-size:13px;" />
             </div>
-            <textarea id="import-text" rows="4" class="mt-8" placeholder="Или вставь сюда JSON-код резервной копии..."></textarea>
-            <button class="btn btn-ok btn-block mt-8" data-action="import-run">Восстановить данные</button>
+            <textarea id="import-text" rows="3" class="mt-8" placeholder="Или вставь скопированный код..."></textarea>
+            <button class="btn btn-ok btn-block mt-8" data-action="import-run">Восстановить</button>
           </div>
         `;
       }
@@ -2093,9 +2161,9 @@
     function renderNav() {
       const items = [
         { id: 'workout', ico: '🏋️', lbl: 'Тренировка' },
-        { id: 'plan', ico: '📅', lbl: 'План' },
-        { id: 'progress', ico: '📈', lbl: 'Прогресс' },
-        { id: 'gym', ico: '⚙️', lbl: 'Зал' }
+        { id: 'plan',    ico: '📅', lbl: 'План' },
+        { id: 'progress',ico: '📈', lbl: 'Прогресс' },
+        { id: 'gym',     ico: '⚙️', lbl: 'Зал' }
       ];
       return `
         <nav class="nav">
@@ -2119,7 +2187,6 @@
       else if (ui.tab === 'plan') main = renderPlanTab();
       else if (ui.tab === 'progress') main = renderProgressTab();
       else main = renderGymTab();
-
       app.innerHTML = renderTopbar() + main + renderTimerBar() + renderNav();
     }
 
@@ -2141,6 +2208,7 @@
       else if (act === 'sel-day') {
         ui.selectedDay = parseInt(btn.dataset.day, 10);
         ui.expandedExId = null;
+        ui.editBaseKey = null;
         render();
       }
       else if (act === 'week-prev') {
@@ -2153,60 +2221,55 @@
       else if (act === 'week-next') {
         state.settings.currentWeek++;
         saveState();
-        showToast(`Неделя ${state.settings.currentWeek} (${getWeekType(state.settings.currentWeek, state.settings.startWeekType) === 'heavy' ? 'Силовая' : 'Разгрузка'})`);
+        showToast(`Неделя ${state.settings.currentWeek} (${getWeekType(state.settings.currentWeek, state.settings.startWeekType) === 'heavy' ? 'Тяжёлая' : 'Лёгкая'})`);
         render();
       }
       else if (act === 'toggle-factors') {
         ui.factorsOpen = !ui.factorsOpen;
         render();
       }
-      else if (act === 'pain-step') {
+      else if (act === 'pain-set') {
         const h = btn.dataset.hand;
-        const dir = parseInt(btn.dataset.dir, 10);
-        const cur = Number(state.settings.elbowPain[h]) || 0;
-        state.settings.elbowPain[h] = Math.max(0, Math.min(10, cur + dir));
-        // Clear untouched drafts for current week so weights recalculate immediately
-        for (const k of Object.keys(state.drafts)) {
-          if (k.startsWith(`w${state.settings.currentWeek}_`)) {
-            const d = state.drafts[k];
-            if (!d.sets || !d.sets.some(s => s.done)) delete state.drafts[k];
-          }
-        }
+        state.settings.elbowPain[h] = parseInt(btn.dataset.val, 10) || 0;
+        clearUntouchedDraftsFor(null);
         saveState();
         render();
       }
       else if (act === 'set-energy') {
         state.settings.energy = btn.dataset.val;
-        for (const k of Object.keys(state.drafts)) {
-          if (k.startsWith(`w${state.settings.currentWeek}_`)) {
-            const d = state.drafts[k];
-            if (!d.sets || !d.sets.some(s => s.done)) delete state.drafts[k];
-          }
-        }
+        clearUntouchedDraftsFor(null);
         saveState();
         render();
       }
       else if (act === 'set-scheme') {
         state.settings.heavyScheme = btn.dataset.val;
-        for (const k of Object.keys(state.drafts)) {
-          const d = state.drafts[k];
-          if (!d.sets || !d.sets.some(s => s.done)) delete state.drafts[k];
-        }
+        clearUntouchedDraftsFor(null);
         saveState();
         render();
       }
       else if (act === 'set-start-wt') {
         state.settings.startWeekType = btn.dataset.val;
+        clearUntouchedDraftsFor(null);
         saveState();
         render();
       }
       else if (act === 'toggle-ex') {
         const id = btn.dataset.id;
         ui.expandedExId = ui.expandedExId === id ? null : id;
+        ui.editBaseKey = null;
         render();
       }
       else if (act === 'sel-hand') {
         ui.selectedHand[btn.dataset.id] = btn.dataset.hand;
+        ui.editBaseKey = null;
+        render();
+      }
+      else if (act === 'open-calib') {
+        ui.editBaseKey = btn.dataset.key;
+        render();
+      }
+      else if (act === 'close-calib') {
+        ui.editBaseKey = null;
         render();
       }
       else if (act === 'apply-calib') {
@@ -2216,9 +2279,9 @@
         const wEl = document.getElementById(`calib-w-${exId}-${hand}`);
         const rEl = document.getElementById(`calib-r-${exId}-${hand}`);
         const w = parseFloat(wEl && wEl.value);
-        const r = parseInt(rEl && rEl.value, 10) || 6;
+        const r = parseInt(rEl && rEl.value, 10) || 8;
         if (isNaN(w) || (w <= 0 && ex.type !== 'bodyweight')) {
-          showToast('Введи рабочий вес в кг');
+          showToast('Впиши вес в кг');
           return;
         }
         if (!ex.baseline1RM) ex.baseline1RM = {};
@@ -2231,8 +2294,9 @@
           ex.baseline1RM[hand] = epley1RM(w, r);
         }
         delete state.drafts[draftKey(state.settings.currentWeek, exId, hand)];
+        ui.editBaseKey = null;
         saveState();
-        showToast(`Готово! Расчётный 1ПМ: ${fmtKg(ex.baseline1RM[hand])} кг`);
+        showToast(`Готово! Расчётный макс ~${fmtKg(ex.baseline1RM[hand])} кг`);
         render();
       }
       else if (act === 'set-w-step') {
@@ -2267,7 +2331,7 @@
         const hand = btn.dataset.hand;
         const plan = computePlan(ex, hand, state.settings.currentWeek);
         const draft = getOrInitDraft(ex, hand, plan);
-        const last = draft.sets[draft.sets.length - 1] || { weight: 10, reps: 6, sec: 15 };
+        const last = draft.sets[draft.sets.length - 1] || { weight: 10, reps: 8, sec: 15 };
         draft.sets.push({ weight: last.weight, reps: last.reps, sec: last.sec, done: false });
         saveState();
         render();
@@ -2324,10 +2388,10 @@
         render();
       }
       else if (act === 'del-hist') {
-        if (!confirm('Удалить эту запись из истории?')) return;
+        if (!confirm('Удалить запись из истории?')) return;
         state.history = state.history.filter(h => h.id !== btn.dataset.id);
         saveState();
-        showToast('Запись удалена');
+        showToast('Удалено');
         render();
       }
       else if (act === 'gym-sub') {
@@ -2337,12 +2401,13 @@
       else if (act === 'add-db') {
         const inp = document.getElementById('new-db-input');
         const val = parseFloat(inp && inp.value);
-        if (isNaN(val) || val <= 0) { showToast('Введи корректный вес'); return; }
+        if (isNaN(val) || val <= 0) { showToast('Впиши вес'); return; }
         const list = getSortedList(state.equipment.dumbbells);
         if (!list.includes(round2(val))) {
           list.push(round2(val));
           list.sort((a, b) => a - b);
           state.equipment.dumbbells.weights = list;
+          clearUntouchedDraftsFor(null);
           saveState();
           showToast(`Добавлена гантель ${fmtKg(val)} кг`);
           render();
@@ -2351,14 +2416,15 @@
       else if (act === 'del-db') {
         const w = parseFloat(btn.dataset.w);
         const list = getSortedList(state.equipment.dumbbells).filter(x => x !== w);
-        if (!list.length) { showToast('Должна остаться хотя бы одна гантель'); return; }
+        if (!list.length) { showToast('Нужна хотя бы одна гантель'); return; }
         state.equipment.dumbbells.weights = list;
+        clearUntouchedDraftsFor(null);
         saveState();
         render();
       }
       else if (act === 'add-custom-ex') {
         const name = (document.getElementById('new-ex-name')?.value || '').trim();
-        if (!name) { showToast('Введи название упражнения'); return; }
+        if (!name) { showToast('Впиши название'); return; }
         const day = parseInt(document.getElementById('new-ex-day').value, 10);
         const equipId = document.getElementById('new-ex-equip').value;
         const hands = document.getElementById('new-ex-hands').value;
@@ -2368,6 +2434,7 @@
           day, order: maxOrder + 1, name, equipId, hands,
           type: equipId === 'table' ? 'table' : (equipId === 'bodyweight_plates' ? 'bodyweight' : 'weight'),
           elbowRisk: false,
+          deloadMode: 'working',
           baseline1RM: {}
         });
         saveState();
@@ -2379,25 +2446,25 @@
         const fname = `armplan-backup-${new Date().toISOString().slice(0, 10)}.json`;
         if (window.AndroidBridge && window.AndroidBridge.shareBackup) {
           window.AndroidBridge.shareBackup(jsonStr, fname);
-          showToast('Выбери куда сохранить резервную копию');
+          showToast('Выбери куда сохранить');
         } else {
           const blob = new Blob([jsonStr], { type: 'application/json' });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
           a.download = fname;
           a.click();
-          showToast('Файл резервной копии скачан');
+          showToast('Файл скачан');
         }
       }
       else if (act === 'export-copy') {
         const txt = JSON.stringify(state);
         if (window.AndroidBridge && window.AndroidBridge.copyText && window.AndroidBridge.copyText(txt)) {
-          showToast('Код скопирован! Сохрани его в Заметках');
+          showToast('Скопировано! Сохрани в Заметках');
         } else if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(txt).then(() => showToast('Код скопирован! Сохрани его в Заметках'));
+          navigator.clipboard.writeText(txt).then(() => showToast('Скопировано!'));
         } else {
           const ta = document.getElementById('import-text');
-          if (ta) { ta.value = txt; ta.select(); document.execCommand('copy'); showToast('Код скопирован!'); }
+          if (ta) { ta.value = txt; ta.select(); document.execCommand('copy'); showToast('Скопировано!'); }
         }
       }
       else if (act === 'import-run') {
@@ -2407,7 +2474,7 @@
           try {
             const parsed = JSON.parse(rawStr);
             if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.history)) {
-              showToast('Неверный формат резервной копии');
+              showToast('Неверный файл копии');
               return;
             }
             state = mergeWithDefaults(parsed);
@@ -2415,7 +2482,7 @@
             showToast(`Восстановлено записей: ${state.history.length}`);
             render();
           } catch {
-            showToast('Ошибка чтения JSON');
+            showToast('Ошибка чтения файла');
           }
         };
         if (fileInp && fileInp.files && fileInp.files[0]) {
@@ -2425,7 +2492,7 @@
         } else if (txtInp && txtInp.value.trim()) {
           applyJson(txtInp.value.trim());
         } else {
-          showToast('Выбери файл или вставь JSON');
+          showToast('Выбери файл или вставь код');
         }
       }
       else if (act === 'timer-add') {
@@ -2485,26 +2552,36 @@
         if (eq && !isNaN(val) && val >= 0) {
           if (el.dataset.field === 'step' && val < 0.25) return;
           eq[el.dataset.field] = round2(val);
-          // Clear untouched drafts so new steps apply immediately
-          for (const k of Object.keys(state.drafts)) {
-            const d = state.drafts[k];
-            if (!d.sets || !d.sets.some(s => s.done)) delete state.drafts[k];
-          }
+          clearUntouchedDraftsFor(null);
           saveState();
-          showToast(`Обновлено: ${eq.name} (история не затронута)`);
+          showToast(`Обновлено: ${eq.name}`);
         }
       }
       else if (act === 'ex-change-equip') {
         const ex = state.exercises.find(x => x.id === el.dataset.id);
         if (ex) {
           ex.equipId = el.value;
+          clearUntouchedDraftsFor(ex.id);
           saveState();
-          showToast('Снаряд упражнения обновлён');
+          showToast('Снаряд обновлён');
+        }
+      }
+      else if (act === 'ex-deload-mode') {
+        const ex = state.exercises.find(x => x.id === el.dataset.id);
+        if (ex) {
+          ex.deloadMode = el.value;
+          clearUntouchedDraftsFor(ex.id);
+          saveState();
+          showToast('Режим разгрузки обновлён');
         }
       }
       else if (act === 'ex-elbow-risk') {
         const ex = state.exercises.find(x => x.id === el.dataset.id);
-        if (ex) { ex.elbowRisk = el.checked; saveState(); }
+        if (ex) {
+          ex.elbowRisk = el.checked;
+          clearUntouchedDraftsFor(ex.id);
+          saveState();
+        }
       }
       else if (act === 'ex-base') {
         const ex = state.exercises.find(x => x.id === el.dataset.id);
@@ -2512,11 +2589,13 @@
           if (!ex.baseline1RM) ex.baseline1RM = {};
           const v = parseFloat(el.value);
           ex.baseline1RM[el.dataset.hand] = isNaN(v) || v <= 0 ? null : round2(v);
+          clearUntouchedDraftsFor(ex.id);
           saveState();
         }
       }
       else if (act === 'set-period') {
         state.settings.period = el.value;
+        clearUntouchedDraftsFor(null);
         saveState();
         render();
       }
@@ -2524,6 +2603,7 @@
         const v = parseFloat(el.value);
         if (!isNaN(v) && v >= 30 && v <= 200) {
           state.settings.bodyweight = round2(v);
+          clearUntouchedDraftsFor(null);
           saveState();
         }
       }
@@ -2540,6 +2620,11 @@
 
     // ==================== ANDROID BACK BUTTON ====================
     window.__armplanBack = function() {
+      if (ui.editBaseKey) {
+        ui.editBaseKey = null;
+        render();
+        return true;
+      }
       if (ui.expandedExId) {
         ui.expandedExId = null;
         render();
