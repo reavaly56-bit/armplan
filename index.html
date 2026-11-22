@@ -490,6 +490,12 @@
       font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px;
       background: var(--danger-bg); color: var(--danger); white-space: nowrap;
     }
+    .nb-extra-del {
+      width: 22px; height: 22px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 15px; font-weight: 700; flex-shrink: 0;
+    }
+    .nb-extra-del:active { background: var(--danger-bg); color: var(--danger); }
 
     /* Paired R / L pills on unilateral sets */
     .rl-checks { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
@@ -623,7 +629,7 @@
   (function() {
     'use strict';
 
-    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.1) ====================
+    // ==================== CONSTANTS & DEFAULT DATA (ArmPlan v2.1.2) ====================
     const STORAGE_KEY = 'armplan_zheka_state_v1';
     const IDB_NAME = 'ArmPlanZhekaDB';
     const IDB_STORE = 'kv';
@@ -1789,6 +1795,34 @@
       return isHandDoneOnWeek(ex.id, 'R', week) && isHandDoneOnWeek(ex.id, 'L', week);
     }
 
+    function getDraftProgress(ex, week) {
+      if (ex.hands === 'uni') {
+        const dR = state.drafts[draftKey(week, ex.id, 'R')];
+        const dL = state.drafts[draftKey(week, ex.id, 'L')];
+        if (!dR && !dL) return { hasAny: false, hasMarked: false, doneSets: 0, totalSets: 0 };
+        const setsR = dR && dR.sets ? dR.sets : [];
+        const setsL = dL && dL.sets ? dL.sets : [];
+        const total = Math.max(setsR.length, setsL.length);
+        let doneSets = 0;
+        for (let i = 0; i < total; i++) {
+          if (setsR[i] && setsR[i].done && setsL[i] && setsL[i].done) doneSets++;
+        }
+        const anyDone = setsR.some(s => s.done) || setsL.some(s => s.done);
+        const anyExtra = Boolean((dR && dR.extraLog && dR.extraLog.length) || (dL && dL.extraLog && dL.extraLog.length));
+        const anyDiff = Boolean(
+          (dR && dR.baseSets && (setsR.length !== dR.baseSets.length || setsR.some((s, i) => dR.baseSets[i] && (s.weight !== dR.baseSets[i].weight || s.reps !== dR.baseSets[i].reps)))) ||
+          (dL && dL.baseSets && (setsL.length !== dL.baseSets.length || setsL.some((s, i) => dL.baseSets[i] && (s.weight !== dL.baseSets[i].weight || s.reps !== dL.baseSets[i].reps))))
+        );
+        return { hasAny: anyDone || anyExtra || anyDiff, hasMarked: anyDone || anyExtra, doneSets, totalSets: total };
+      }
+      const d = state.drafts[draftKey(week, ex.id, 'both')];
+      if (!d || !d.sets) return { hasAny: false, hasMarked: false, doneSets: 0, totalSets: 0 };
+      const doneSets = d.sets.filter(s => s.done).length;
+      const anyExtra = Boolean(d.extraLog && d.extraLog.length);
+      const anyDiff = Boolean(d.baseSets && (d.sets.length !== d.baseSets.length || d.sets.some((s, i) => d.baseSets[i] && (s.weight !== d.baseSets[i].weight || s.reps !== d.baseSets[i].reps))));
+      return { hasAny: doneSets > 0 || anyExtra || anyDiff, hasMarked: doneSets > 0 || anyExtra, doneSets, totalSets: d.sets.length };
+    }
+
     function getDayExercises(day) {
       return state.exercises.filter(e => e.day === day).sort((a, b) => a.order - b.order);
     }
@@ -1843,10 +1877,11 @@
       if (!ex) ex = list[0];
 
       const initHand = ex.hands === 'both' ? 'both' : 'R';
-      let setIdx = 0, hand = initHand;
+      let setIdx = 0, hand = initHand, initPhase = 'ready';
       if (!needsCalibrationForEx(ex, week)) {
         const slot = findNextPairedSlot(ex, week, 0, initHand);
         if (slot) { setIdx = slot.setIdx; hand = slot.hand; }
+        else { initPhase = 'finish_ex'; }
       }
 
       state.activeSession = {
@@ -1855,7 +1890,7 @@
         exId: ex.id,
         hand,
         setIdx,
-        phase: 'ready', // 'ready' | 'working' | 'resting' | 'rest_done' | 'finish_ex' | 'day_done'
+        phase: initPhase, // 'ready' | 'working' | 'resting' | 'rest_done' | 'finish_ex' | 'day_done'
         restType: null, // 'between_hands' | 'between_sets' | 'between_ex'
         restTotal: 90,
         restEndAt: 0,
@@ -1875,15 +1910,16 @@
       const sess = state.activeSession;
       if (!sess) return;
       const initHand = ex.hands === 'both' ? 'both' : 'R';
-      let setIdx = 0, hand = initHand;
+      let setIdx = 0, hand = initHand, initPhase = 'ready';
       if (!needsCalibrationForEx(ex, sess.week)) {
         const slot = findNextPairedSlot(ex, sess.week, 0, initHand);
         if (slot) { setIdx = slot.setIdx; hand = slot.hand; }
+        else { initPhase = 'finish_ex'; }
       }
       sess.exId = ex.id;
       sess.hand = hand;
       sess.setIdx = setIdx;
-      sess.phase = 'ready';
+      sess.phase = initPhase;
       sess.restType = null;
       sess.restEndAt = 0;
       sess.workStartedAt = 0;
@@ -1994,7 +2030,7 @@
         subHtml = `<div class="top-sub light"><span class="top-dot"></span>${daysLeft !== null && daysLeft >= 0 ? `До старта: ${daysLeft} дн.` : 'Дневник силы'}</div>`;
         title = 'Прогресс';
       } else if (ui.tab === 'gym') {
-        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.1</div>`;
+        subHtml = `<div class="top-sub" style="color:var(--blue);">ArmPlan v2.1.2</div>`;
         title = 'Настройки и зал';
       }
 
@@ -2091,6 +2127,12 @@
         }
 
         const needsCal = needsCalibrationForEx(ex, wk);
+        const draftProg = !done ? getDraftProgress(ex, wk) : null;
+        if (draftProg && draftProg.hasMarked) {
+          badges += draftProg.doneSets > 0
+            ? `<span class="chip chip-blue">начато ${draftProg.doneSets}/${draftProg.totalSets}</span>`
+            : `<span class="chip chip-blue">в процессе</span>`;
+        }
         return `
           <button class="ex-row ${done ? 'done' : ''}" data-action="start-ex" data-id="${ex.id}">
             <div class="ex-row-left">
@@ -2423,6 +2465,9 @@
               <button class="btn btn-sm btn-block mt-8" style="border:none; background:transparent; color:var(--muted);" data-action="sess-add-set">
                 + Добавить ещё подход
               </button>
+              <button class="btn btn-sm btn-block" style="border:none; background:transparent; color:var(--danger); min-height:32px;" data-action="sess-reset-ex">
+                Сбросить и начать с 1-го подхода
+              </button>
             </div>
           </div>
         `;
@@ -2494,6 +2539,11 @@
                 </div>
               </div>
             `}
+            ${sObj.done ? `
+              <button class="btn btn-sm btn-danger btn-block mt-8" data-action="sess-uncheck-slot" data-idx="${idxToEdit}" data-hand="${handToEdit}">
+                Снять галочку (переделать подход)
+              </button>
+            ` : ''}
           </div>
         `;
       };
@@ -2748,20 +2798,20 @@
         const items = [];
         if (isUni) {
           const usedL = new Set();
-          listR.forEach(itemR => {
+          listR.forEach((itemR, idxR) => {
             const matchIdx = listL.findIndex((x, i) => !usedL.has(i) && x.kind === itemR.kind && x.setIdx === itemR.setIdx && x.weight === itemR.weight && x.reps === itemR.reps);
             if (matchIdx >= 0) {
               usedL.add(matchIdx);
-              items.push({ ...itemR, handTag: 'П·Л' });
+              items.push({ ...itemR, handTag: 'П·Л', idxR, idxL: matchIdx });
             } else {
-              items.push({ ...itemR, handTag: 'П' });
+              items.push({ ...itemR, handTag: 'П', idxR, idxL: -1 });
             }
           });
-          listL.forEach((itemL, i) => {
-            if (!usedL.has(i)) items.push({ ...itemL, handTag: 'Л' });
+          listL.forEach((itemL, idxL) => {
+            if (!usedL.has(idxL)) items.push({ ...itemL, handTag: 'Л', idxR: -1, idxL });
           });
         } else {
-          listR.forEach(item => items.push({ ...item, handTag: '' }));
+          listR.forEach((item, idxB) => items.push({ ...item, handTag: '', idxR: idxB, idxL: -1 }));
         }
         items.forEach(it => {
           const slot = Math.max(0, Math.min(draftR.sets.length - 1, Number(it.setIdx) || 0));
@@ -2782,7 +2832,10 @@
                 <span class="nb-weight">${wStr}</span>
                 ${it.handTag ? `<span class="nb-tag">${it.handTag}</span>` : ''}
               </div>
-              <span class="${isW ? 'nb-pill-warm' : 'nb-pill-fail'}">${isW ? 'разминка' : 'не засчитан'}</span>
+              <div class="row" style="gap:4px;">
+                <span class="${isW ? 'nb-pill-warm' : 'nb-pill-fail'}">${isW ? 'разминка' : 'не засчитан'}</span>
+                <button class="nb-extra-del" data-action="sess-del-extra" data-ir="${it.idxR}" data-il="${it.idxL}" aria-label="Убрать">×</button>
+              </div>
             </div>
           `;
         }).join('');
@@ -2859,6 +2912,8 @@
         }
       }
 
+      const hasExProgress = getDraftProgress(ex, sess.week).hasAny;
+
       return `
         ${headerHtml}
         <div class="container">
@@ -2868,7 +2923,10 @@
           <div class="nb-card">
             <div class="nb-head">
               <span>${isUni ? 'Подходы: Правая → Левая' : (isWarmup ? `Все подходы · ${draftR.sets.length} × ${ex.warmupReps || 10}` : 'Все подходы (тап — править)')}</span>
-              <button class="chip chip-muted" data-action="sess-add-set">+ Подход</button>
+              <div class="row" style="gap:6px;">
+                ${hasExProgress ? `<button class="chip chip-danger" data-action="sess-reset-ex">Сбросить</button>` : ''}
+                <button class="chip chip-muted" data-action="sess-add-set">+ Подход</button>
+              </div>
             </div>
             ${nbRows}
           </div>
@@ -3144,7 +3202,10 @@
           </div>
 
           <div class="row-between mb-8" style="padding:2px 2px 0;">
-            <div style="font-weight:800;">Последние записи (${filteredHist.length})</div>
+            <div class="row" style="gap:8px;">
+              <div style="font-weight:800;">Последние записи (${filteredHist.length})</div>
+              ${(state.history.length > 0 || Object.values(state.drafts || {}).some(d => d && ((d.sets && d.sets.some(s => s.done)) || (d.extraLog && d.extraLog.length)))) ? `<button class="chip chip-danger" data-action="clear-history">Очистить</button>` : ''}
+            </div>
             <select style="width:auto; padding:6px 10px; font-size:12.5px;" data-action="hist-filter">
               <option value="all" ${ui.histFilter === 'all' ? 'selected' : ''}>Все дни</option>
               <option value="1" ${ui.histFilter === '1' ? 'selected' : ''}>День 1</option>
@@ -3165,7 +3226,7 @@
           <button class="${ui.gymSub === 'program' ? 'active' : ''}" data-action="gym-sub" data-sub="program">Цикл</button>
           <button class="${ui.gymSub === 'equip' ? 'active' : ''}" data-action="gym-sub" data-sub="equip">Снаряды</button>
           <button class="${ui.gymSub === 'exercises' ? 'active' : ''}" data-action="gym-sub" data-sub="exercises">Упражн.</button>
-          <button class="${ui.gymSub === 'backup' ? 'active' : ''}" data-action="gym-sub" data-sub="backup">Бэкап</button>
+          <button class="${ui.gymSub === 'backup' ? 'active' : ''}" data-action="gym-sub" data-sub="backup">Данные</button>
         </div>
       `;
 
@@ -3330,6 +3391,12 @@
             <div class="mt-8"><input id="import-file" type="file" accept=".json,application/json" style="width:100%; font-size:13px;" /></div>
             <textarea id="import-text" rows="3" class="mt-8" placeholder="Или вставь скопированный код..."></textarea>
             <button class="btn btn-ok btn-block mt-8" data-action="import-run">Восстановить</button>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Очистить историю тренировок</div>
+            <div class="small muted mt-6">Уберёт все тестовые записи, графики и незавершённые подходы (черновики), вернёт 1-ю неделю. Твои рабочие веса, гантели и снаряды сохранятся.</div>
+            <button class="btn btn-danger btn-block mt-12" data-action="clear-history">Очистить историю и черновики</button>
           </div>
         `;
       }
@@ -3757,20 +3824,105 @@
         e.stopPropagation();
         const sess = state.activeSession;
         if (!sess) return;
+        const ex = state.exercises.find(x => x.id === sess.exId);
         const idx = parseInt(btn.dataset.idx, 10);
         const h = btn.dataset.hand || sess.hand;
-        if (idx === sess.setIdx && h === sess.hand) {
-          const same = sess.editingSlot && sess.editingSlot.setIdx === idx && sess.editingSlot.hand === h;
+        const dTarget = getOrInitDraft(ex, h, computePlan(ex, h, sess.week), sess.week);
+        const slotDone = Boolean(dTarget.sets[idx] && dTarget.sets[idx].done);
+        const same = sess.editingSlot && sess.editingSlot.setIdx === idx && sess.editingSlot.hand === h;
+        if (slotDone || (idx === sess.setIdx && h === sess.hand)) {
+          // Tap on already-done (or current) slot immediately toggles its inline editor (with "Снять галочку")
           sess.editingSlot = same ? null : { setIdx: idx, hand: h };
         } else if (sess.phase === 'ready' || sess.phase === 'rest_done') {
           sess.setIdx = idx;
           sess.hand = h;
           sess.editingSlot = null;
         } else {
-          const same = sess.editingSlot && sess.editingSlot.setIdx === idx && sess.editingSlot.hand === h;
           sess.editingSlot = same ? null : { setIdx: idx, hand: h };
         }
         saveState();
+        render();
+      }
+      else if (act === 'sess-uncheck-slot') {
+        e.stopPropagation();
+        const sess = state.activeSession;
+        if (!sess) return;
+        const ex = state.exercises.find(x => x.id === sess.exId);
+        const idx = parseInt(btn.dataset.idx, 10);
+        const h = btn.dataset.hand || sess.hand;
+        const draft = getOrInitDraft(ex, h, computePlan(ex, h, sess.week), sess.week);
+        if (!draft.sets[idx]) return;
+        draft.sets[idx].done = false;
+        draft.sets[idx].feel = 'ok';
+        deriveDraftEffort(draft);
+        sess.editingSlot = null;
+        sess.lastCompleted = null;
+        if (sess.phase !== 'working' && sess.phase !== 'resting') {
+          sess.setIdx = idx;
+          sess.hand = h;
+          sess.phase = 'ready';
+          sess.restType = null;
+          sess.restEndAt = 0;
+        }
+        saveState();
+        showToast('Галочка снята — можно переделать подход');
+        render();
+      }
+      else if (act === 'sess-del-extra') {
+        e.stopPropagation();
+        const sess = state.activeSession;
+        if (!sess) return;
+        const ex = state.exercises.find(x => x.id === sess.exId);
+        const ir = parseInt(btn.dataset.ir, 10);
+        const il = parseInt(btn.dataset.il, 10);
+        if (ex.hands === 'uni') {
+          if (!isNaN(ir) && ir >= 0) {
+            const dR = getOrInitDraft(ex, 'R', computePlan(ex, 'R', sess.week), sess.week);
+            if (dR.extraLog && ir < dR.extraLog.length) {
+              dR.extraLog.splice(ir, 1);
+              deriveDraftEffort(dR);
+            }
+          }
+          if (!isNaN(il) && il >= 0) {
+            const dL = getOrInitDraft(ex, 'L', computePlan(ex, 'L', sess.week), sess.week);
+            if (dL.extraLog && il < dL.extraLog.length) {
+              dL.extraLog.splice(il, 1);
+              deriveDraftEffort(dL);
+            }
+          }
+        } else if (!isNaN(ir) && ir >= 0) {
+          const dB = getOrInitDraft(ex, 'both', computePlan(ex, 'both', sess.week), sess.week);
+          if (dB.extraLog && ir < dB.extraLog.length) {
+            dB.extraLog.splice(ir, 1);
+            deriveDraftEffort(dB);
+          }
+        }
+        sess.lastCompleted = null;
+        saveState();
+        showToast('Запись убрана');
+        render();
+      }
+      else if (act === 'sess-reset-ex') {
+        const sess = state.activeSession;
+        if (!sess) return;
+        const ex = state.exercises.find(x => x.id === sess.exId);
+        if (!confirm('Сбросить все отмеченные подходы в этом упражнении и начать с 1-го?')) return;
+        if (ex.hands === 'uni') {
+          delete state.drafts[draftKey(sess.week, ex.id, 'R')];
+          delete state.drafts[draftKey(sess.week, ex.id, 'L')];
+        } else {
+          delete state.drafts[draftKey(sess.week, ex.id, 'both')];
+        }
+        sess.setIdx = 0;
+        sess.hand = ex.hands === 'uni' ? 'R' : 'both';
+        sess.phase = 'ready';
+        sess.restType = null;
+        sess.restEndAt = 0;
+        sess.workStartedAt = 0;
+        sess.editingSlot = null;
+        sess.lastCompleted = null;
+        saveState();
+        showToast('Сброшено — начинаем с 1-го подхода');
         render();
       }
       else if (act === 'sess-step-w' || act === 'sess-step-r') {
@@ -3898,6 +4050,18 @@
         state.history = state.history.filter(h => h.id !== btn.dataset.id);
         saveState();
         showToast('Удалено');
+        render();
+      }
+      else if (act === 'clear-history') {
+        if (!confirm('Очистить всю историю тренировок и незавершённые подходы? Твои рабочие веса и настройки зала останутся.')) return;
+        state.history = [];
+        state.drafts = {};
+        state.activeSession = null;
+        state.settings.currentWeek = 1;
+        ui.planWeek = 1;
+        saveState();
+        syncKeepScreenOn();
+        showToast('История и черновики очищены');
         render();
       }
       else if (act === 'gym-sub') { ui.gymSub = btn.dataset.sub; render(); }
